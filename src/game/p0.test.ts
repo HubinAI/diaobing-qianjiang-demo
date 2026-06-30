@@ -5,6 +5,7 @@ import { createInitialSlots } from './engine'
 import { enemyPaths, pathIdFor, samplePath } from './paths'
 import { getCompatibleGhostFiles } from '../ghost/ghostRepository'
 import { validateGhostRunFile } from '../ghost/ghostValidator'
+import type { DuelGameState, ReserveItem, Star, TroopType } from '../types/game'
 
 function advanceDuel(seconds: number) {
   const state = createInitialDuelState('duel-seed-001', 'playing')
@@ -13,6 +14,17 @@ function advanceDuel(seconds: number) {
     player: { ...state.player, guardianHp: 10000 },
     ghost: { ...state.ghost, guardianHp: 10000 },
   }, { type: 'advanceTime', seconds })
+}
+
+function troopItem(id: string, troopType: TroopType, star: Star = 1, batchIndex?: number, recruitSlotIndex?: number): ReserveItem {
+  const item: ReserveItem = { id, type: 'troop', troopType, star }
+  if (batchIndex !== undefined) item.batchIndex = batchIndex
+  if (recruitSlotIndex !== undefined) item.recruitSlotIndex = recruitSlotIndex
+  return item
+}
+
+function occupantId(state: DuelGameState, slotId: string) {
+  return state.player.slots.find((slot) => slot.id === slotId)?.occupantId
 }
 
 describe('round 5 ghost duel core', () => {
@@ -118,6 +130,121 @@ describe('round 5 ghost duel core', () => {
     })
     expect(result.ok).toBe(true)
     expect(result.state!.ghost.slots.find((slot) => slot.id === 'ghost-right-locked-0')?.unlocked).toBe(true)
+  })
+
+  it('swaps deployed units when a slot drop cannot merge', () => {
+    let state = createInitialDuelState('swap-seed', 'playing')
+    state = duelReducer(state, {
+      type: 'setReserveItems',
+      items: [troopItem('reserve-blade', 'blade'), troopItem('reserve-spear', 'spear')],
+    })
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'reserve', itemId: 'reserve-blade' },
+      target: { type: 'slot', slotId: 'player-left-active-0' },
+    })
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'reserve', itemId: 'reserve-spear' },
+      target: { type: 'slot', slotId: 'player-right-active-0' },
+    })
+
+    const leftBefore = occupantId(state, 'player-left-active-0')!
+    const rightBefore = occupantId(state, 'player-right-active-0')!
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'slot', unitId: leftBefore },
+      target: { type: 'slot', slotId: 'player-right-active-0' },
+    })
+
+    expect(occupantId(state, 'player-left-active-0')).toBe(rightBefore)
+    expect(occupantId(state, 'player-right-active-0')).toBe(leftBefore)
+    expect(state.player.troops[leftBefore].slotId).toBe('player-right-active-0')
+    expect(state.player.troops[rightBefore].slotId).toBe('player-left-active-0')
+    expect(state.player.metrics.mergeCount).toBe(0)
+  })
+
+  it('swaps reserve units when a reserve drop cannot merge', () => {
+    let state = createInitialDuelState('swap-seed', 'playing')
+    state = duelReducer(state, {
+      type: 'setReserveItems',
+      items: [troopItem('reserve-blade', 'blade'), troopItem('reserve-spear', 'spear')],
+    })
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'reserve', itemId: 'reserve-blade' },
+      target: { type: 'reserve', index: 1 },
+    })
+
+    expect(state.player.reserveItems.map((item) => item.id)).toEqual(['reserve-spear', 'reserve-blade'])
+    expect(state.player.metrics.mergeCount).toBe(0)
+  })
+
+  it('swaps a deployed unit with an occupied reserve slot when they cannot merge', () => {
+    let state = createInitialDuelState('swap-seed', 'playing')
+    state = duelReducer(state, {
+      type: 'setReserveItems',
+      items: [troopItem('reserve-blade', 'blade'), troopItem('reserve-spear', 'spear')],
+    })
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'reserve', itemId: 'reserve-blade' },
+      target: { type: 'slot', slotId: 'player-left-active-0' },
+    })
+
+    const slotUnitId = occupantId(state, 'player-left-active-0')!
+    state = duelReducer(state, {
+      type: 'drop',
+      payload: { source: 'slot', unitId: slotUnitId },
+      target: { type: 'reserve', index: 0 },
+    })
+
+    const nextSlotUnitId = occupantId(state, 'player-left-active-0')!
+    expect(state.player.troops[nextSlotUnitId].troopType).toBe('spear')
+    expect(state.player.reserveItems[0]).toMatchObject({ type: 'troop', troopType: 'blade', star: 1 })
+    expect(state.player.metrics.mergeCount).toBe(0)
+  })
+
+  it('treats reserve-to-occupied-slot swaps as successful deploy commands', () => {
+    let state = createInitialDuelState('swap-seed', 'playing')
+    state = {
+      ...state,
+      player: {
+        ...state.player,
+        reserveItems: [troopItem('batch-blade', 'blade', 1, 0, 0), troopItem('batch-spear', 'spear', 1, 0, 1)],
+      },
+    }
+
+    let result = executeGameCommand(state, {
+      sideId: 'player',
+      source: 'player',
+      type: 'deploy',
+      payload: {
+        item: { batchIndex: 0, recruitSlotIndex: 0, expectedType: 'blade', expectedStar: 1 },
+        targetSlotId: 'player-left-active-0',
+      },
+    })
+    expect(result.ok).toBe(true)
+    state = result.state!
+
+    result = executeGameCommand(state, {
+      sideId: 'player',
+      source: 'player',
+      type: 'deploy',
+      payload: {
+        item: { batchIndex: 0, recruitSlotIndex: 1, expectedType: 'spear', expectedStar: 1 },
+        targetSlotId: 'player-left-active-0',
+      },
+    })
+    expect(result.ok).toBe(true)
+    state = result.state!
+
+    const slotUnitId = occupantId(state, 'player-left-active-0')!
+    expect(state.player.troops[slotUnitId].troopType).toBe('spear')
+    expect(state.player.reserveItems).toHaveLength(1)
+    expect(state.player.reserveItems[0]).toMatchObject({ type: 'troop', troopType: 'blade', star: 1 })
+    expect(state.player.reserveItems.some((item) => item.id === 'batch-spear')).toBe(false)
+    expect(state.player.metrics.mergeCount).toBe(0)
   })
 
   it('ships compatible easy, normal and hard ghost event files that replay cleanly', () => {

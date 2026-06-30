@@ -176,7 +176,7 @@ export function executeGameCommand(state: DuelGameState, command: GameCommand) {
       payload: { source: 'reserve', itemId: item.id },
       target: { type: 'slot', slotId: payload.targetSlotId },
     })
-    return { ok: next[command.sideId].reserveItems.length < side.reserveItems.length, state: next }
+    return { ok: !next[command.sideId].reserveItems.some((candidate) => candidate.id === item.id), state: next }
   }
 
   if (command.type === 'move') {

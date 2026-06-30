@@ -7,6 +7,7 @@ import { drawRecruitBatch } from '../game/randomPool'
 import { tickShovels, unlockSlotWithShovel } from '../game/shovel'
 import type {
   BoardUnit,
+  DeploymentSlot,
   DuelGameState,
   DragPayload,
   DropTarget,
@@ -95,6 +96,23 @@ function setSlotOccupant(state: GameState, slotId: string, occupantId?: string) 
 
 function makeReserveFromTroop(unit: TroopUnit): ReserveItem {
   return { id: `reserve-${unit.id}`, type: 'troop', troopType: unit.troopType, star: unit.star }
+}
+
+function makeTroopFromReserve(item: Extract<ReserveItem, { type: 'troop' }>, slot: DeploymentSlot, elapsedSeconds: number): TroopUnit {
+  const unitId = `unit-${item.id}`
+  return {
+    id: unitId,
+    kind: 'troop',
+    troopType: item.troopType,
+    star: item.star,
+    lane: laneFromSlot(slot),
+    slotId: slot.id,
+    nextAttackAt: elapsedSeconds,
+  }
+}
+
+function replaceReserveItem(items: ReserveItem[], itemId: string, replacement: ReserveItem) {
+  return items.map((item) => (item.id === itemId ? replacement : item))
 }
 
 function insertReserve(items: ReserveItem[], item: ReserveItem, index: number) {
@@ -294,24 +312,39 @@ function deployReserveToSlot(state: GameState, item: ReserveItem, slotId: string
     if (!targetUnit) return state
 
     if (item.type === 'troop' && targetUnit.kind === 'troop') {
-      if (!canMergeTroops(item, targetUnit)) {
-        return withToast(state, troopMergeError(item, targetUnit), slotId)
+      if (canMergeTroops(item, targetUnit)) {
+        const mergedStar = nextStar(targetUnit.star)
+        const troops = {
+          ...state.troops,
+          [targetUnit.id]: { ...targetUnit, star: mergedStar },
+        }
+        return markEffect({
+          ...state,
+          troops,
+          reserveItems: removeReserveItem(state.reserveItems, item.id),
+          metrics: {
+            ...state.metrics,
+            mergeCount: state.metrics.mergeCount + 1,
+            batchItemsUsed: state.metrics.batchItemsUsed + 1,
+          },
+        }, troopMergeText(targetUnit.troopType, mergedStar))
       }
-      const mergedStar = nextStar(targetUnit.star)
-      const troops = {
-        ...state.troops,
-        [targetUnit.id]: { ...targetUnit, star: mergedStar },
-      }
-      return markEffect({
+
+      const nextUnit = makeTroopFromReserve(item, slot, state.elapsedSeconds)
+      const troops = { ...state.troops }
+      delete troops[targetUnit.id]
+      troops[nextUnit.id] = nextUnit
+      return {
         ...state,
         troops,
-        reserveItems: removeReserveItem(state.reserveItems, item.id),
+        slots: setSlotOccupant(state, slot.id, nextUnit.id),
+        reserveItems: replaceReserveItem(state.reserveItems, item.id, makeReserveFromTroop(targetUnit)),
         metrics: {
           ...state.metrics,
-          mergeCount: state.metrics.mergeCount + 1,
           batchItemsUsed: state.metrics.batchItemsUsed + 1,
+          deployCount: state.metrics.deployCount + 1,
         },
-      }, troopMergeText(targetUnit.troopType, mergedStar))
+      }
     }
 
     if (item.type === 'general') {
@@ -422,7 +455,6 @@ function moveSlotUnitToSlot(state: GameState, unitId: string, targetSlotId: stri
           metrics: { ...state.metrics, mergeCount: state.metrics.mergeCount + 1 },
         }, troopMergeText(targetUnit.troopType, mergedStar))
       }
-      return withToast(state, troopMergeError(sourceUnit, targetUnit), targetSlotId)
     }
 
     const slots = state.slots.map((slot) => {
@@ -478,13 +510,13 @@ function dropToReserve(state: GameState, payload: DragPayload, index: number): G
     const sourceItem = state.reserveItems.find((item) => item.id === payload.itemId)
     if (!sourceItem || sourceItem.id === targetItem?.id) return state
 
-    if (targetItem && sourceItem.type === 'troop' && targetItem.type === 'troop') {
+    if (targetItem && sourceItem.type === 'troop' && targetItem.type === 'troop' && canMergeTroops(sourceItem, targetItem)) {
       return mergeReserveTroop(state, sourceItem, targetItem)
     }
 
     const withoutSource = removeReserveItem(state.reserveItems, sourceItem.id)
     const targetIndex = Math.min(index, withoutSource.length)
-  if (targetItem) {
+    if (targetItem) {
       const swapped = [...state.reserveItems]
       const sourceIndex = swapped.findIndex((item) => item.id === sourceItem.id)
       swapped[sourceIndex] = targetItem
@@ -499,23 +531,35 @@ function dropToReserve(state: GameState, payload: DragPayload, index: number): G
   if (!unit || !sourceSlot) return state
   if (unit.kind !== 'troop') return withToast(state, '名将只能在战场格中调动')
 
-    if (targetItem) {
+  if (targetItem) {
     if (targetItem.type !== 'troop') return withToast(state, '预备格目标不可合成')
-    if (!canMergeTroops(unit, targetItem)) return withToast(state, troopMergeError(unit, targetItem))
-    const mergedStar = nextStar(targetItem.star)
+    if (canMergeTroops(unit, targetItem)) {
+      const mergedStar = nextStar(targetItem.star)
+      const troops = { ...state.troops }
+      delete troops[unit.id]
+      return markEffect({
+        ...state,
+        troops,
+        slots: setSlotOccupant(state, sourceSlot.id, undefined),
+        reserveItems: state.reserveItems.map((item) => (item.id === targetItem.id ? { ...targetItem, star: mergedStar } : item)),
+        metrics: {
+          ...state.metrics,
+          mergeCount: state.metrics.mergeCount + 1,
+          batchItemsUsed: state.metrics.batchItemsUsed + 1,
+        },
+      }, troopMergeText(targetItem.troopType, mergedStar))
+    }
+
+    const nextUnit = makeTroopFromReserve(targetItem, sourceSlot, state.elapsedSeconds)
     const troops = { ...state.troops }
     delete troops[unit.id]
-    return markEffect({
+    troops[nextUnit.id] = nextUnit
+    return {
       ...state,
       troops,
-      slots: setSlotOccupant(state, sourceSlot.id, undefined),
-      reserveItems: state.reserveItems.map((item) => (item.id === targetItem.id ? { ...targetItem, star: mergedStar } : item)),
-      metrics: {
-        ...state.metrics,
-        mergeCount: state.metrics.mergeCount + 1,
-        batchItemsUsed: state.metrics.batchItemsUsed + 1,
-      },
-    }, troopMergeText(targetItem.troopType, mergedStar))
+      slots: setSlotOccupant(state, sourceSlot.id, nextUnit.id),
+      reserveItems: replaceReserveItem(state.reserveItems, targetItem.id, makeReserveFromTroop(unit)),
+    }
   }
 
   if (state.reserveItems.length >= gameConfig.reserveCapacity) return withToast(state, '预备格已满')
