@@ -39,6 +39,7 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   await expect(page.getByTestId('ghost-half')).toBeVisible()
   await expect(page.getByTestId('player-guardian-hp')).toContainText('%')
   await expect(page.getByTestId('ghost-guardian-hp')).toContainText('%')
+  await expect(page.getByTestId('duel-time')).toContainText('100%')
   await expect(page.getByTestId('ghost-name')).toContainText('演武对手')
   await expect(page.getByTestId('ghost-difficulty')).toContainText('normal')
   await expect(page.getByTestId('lead-status')).toBeVisible()
@@ -57,6 +58,14 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     expect(ghost.x).toBeCloseTo(slot.x)
     expect(ghost.y).toBeCloseTo(1 - slot.y)
   })
+})
+
+test('shows opponent Diaochan live HP in the former time slot', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__gameDebug!.setGuardianHp('ghost', 72)
+  })
+  await expect(page.getByTestId('duel-time')).toContainText('72%')
+  await expect(page.getByTestId('duel-time')).toHaveAttribute('data-value', '72')
 })
 
 test('uses same seed for equal recruit batches and no hidden ghost resources', async ({ page }) => {

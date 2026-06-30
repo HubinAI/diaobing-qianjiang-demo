@@ -6,12 +6,6 @@ interface TopHudProps {
   state: DuelGameState
 }
 
-function formatTime(seconds: number): string {
-  const minutes = Math.floor(seconds / 60)
-  const rest = Math.floor(seconds % 60)
-  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
-}
-
 function hpPercent(hp: number) {
   return Math.max(0, Math.round((hp / gameConfig.guardianMaxHp) * 100))
 }
@@ -25,6 +19,7 @@ function leadStatus(state: DuelGameState) {
 
 export function TopHud({ state }: TopHudProps) {
   const wave = waves[state.player.waveIndex - 1]
+  const ghostHpPercent = hpPercent(state.ghost.guardianHp)
   const countdown =
     state.player.waveBreakRemaining > 0
       ? `下波 ${Math.ceil(state.player.waveBreakRemaining)}`
@@ -42,7 +37,9 @@ export function TopHud({ state }: TopHudProps) {
         </div>
       </div>
       <div className="hud-time">
-        <strong data-testid="duel-time" data-value={state.elapsedSeconds}>{formatTime(state.elapsedSeconds)}</strong>
+        <strong data-testid="duel-time" data-value={ghostHpPercent} data-elapsed={state.elapsedSeconds}>
+          对方貂蝉 {ghostHpPercent}%
+        </strong>
         {countdown && <span>{countdown}</span>}
         <i data-testid="duel-phase" data-value={state.phase}>{state.phase}</i>
         <i data-testid="wave-counter" data-value={state.player.waveIndex}>第{state.player.waveIndex}/{waves.length}波</i>
@@ -61,7 +58,7 @@ export function TopHud({ state }: TopHudProps) {
         <small>+{gameConfig.coinRegenPerSecond}/秒</small>
       </div>
       <div className="duel-hp-mini">
-        <span data-testid="ghost-guardian-hp">对方 {hpPercent(state.ghost.guardianHp)}%</span>
+        <span data-testid="ghost-guardian-hp">对方 {ghostHpPercent}%</span>
         <span data-testid="player-guardian-hp">我方 {hpPercent(state.player.guardianHp)}%</span>
       </div>
     </header>

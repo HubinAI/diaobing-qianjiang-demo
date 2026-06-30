@@ -93,8 +93,9 @@ button {
 
 .hud-time strong {
   line-height: 1;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 950;
+  white-space: nowrap;
 }
 
 .hud-time span {
