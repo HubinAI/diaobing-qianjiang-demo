@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "rulesetVersion": "ghost-duel-v1",
+  "configHash": "round5-a81d2f",
+  "ghostId": "ghost-easy-001",
+  "displayName": "试炼新手",
+  "avatarId": "avatar_01",
+  "difficulty": "easy",
+  "seed": "duel-seed-001",
+  "recordedAt": "2026-06-30T00:00:00.000Z",
+  "durationSeconds": 180,
+  "result": "lose",
+  "finalGuardianHp": 0,
+  "actions": [
+    { "id": "easy-a1", "at": 0.5, "type": "recruit_batch", "payload": { "expectedBatchIndex": 0 } },
+    {
+      "id": "easy-a2",
+      "at": 1.4,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 0, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-0"
+      }
+    },
+    {
+      "id": "easy-a3",
+      "at": 2.6,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 3, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-1"
+      }
+    },
+    {
+      "id": "easy-a4",
+      "at": 4.2,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 1, "expectedType": "blade", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-0"
+      }
+    }
+  ],
+  "metrics": { "recruitCount": 1, "deployCount": 3, "mergeCount": 0, "unlockCount": 0, "generalCount": 0, "weaponCount": 0 }
+}

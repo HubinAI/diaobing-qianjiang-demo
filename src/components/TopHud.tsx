@@ -1,0 +1,69 @@
+import { duelConfig, gameConfig } from '../config/gameConfig'
+import { waves } from '../game/waves'
+import type { DuelGameState } from '../types/game'
+
+interface TopHudProps {
+  state: DuelGameState
+}
+
+function formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60)
+  const rest = Math.floor(seconds % 60)
+  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
+}
+
+function hpPercent(hp: number) {
+  return Math.max(0, Math.round((hp / gameConfig.guardianMaxHp) * 100))
+}
+
+function leadStatus(state: DuelGameState) {
+  const lead = state.player.guardianHp / gameConfig.guardianMaxHp - state.ghost.guardianHp / gameConfig.guardianMaxHp
+  if (lead >= duelConfig.aheadThreshold) return '领先'
+  if (lead <= duelConfig.behindThreshold) return '落后'
+  return '势均力敌'
+}
+
+export function TopHud({ state }: TopHudProps) {
+  const wave = waves[state.player.waveIndex - 1]
+  const countdown =
+    state.player.waveBreakRemaining > 0
+      ? `下波 ${Math.ceil(state.player.waveBreakRemaining)}`
+      : wave?.index === 8
+        ? 'Boss 来袭'
+        : ''
+
+  return (
+    <header className="top-hud duel-hud">
+      <div className="ghost-card">
+        <span className="ghost-avatar" aria-hidden="true">影</span>
+        <div>
+          <strong data-testid="ghost-name">{state.ghostName}</strong>
+          <small data-testid="ghost-difficulty">{state.ghostDifficulty}</small>
+        </div>
+      </div>
+      <div className="hud-time">
+        <strong data-testid="duel-time" data-value={state.elapsedSeconds}>{formatTime(state.elapsedSeconds)}</strong>
+        {countdown && <span>{countdown}</span>}
+        <i data-testid="duel-phase" data-value={state.phase}>{state.phase}</i>
+        <i data-testid="wave-counter" data-value={state.player.waveIndex}>第{state.player.waveIndex}/{waves.length}波</i>
+        <i data-testid="ghost-next-action-index" data-value={state.ghostReplay.nextActionIndex}>{state.ghostReplay.nextActionIndex}</i>
+        <i data-testid="ghost-action-failure-count" data-value={state.ghostReplay.failedActionCount}>{state.ghostReplay.failedActionCount}</i>
+        <i data-testid="last-enemy-moved-at" data-value={Math.max(state.player.lastEnemyMovedAt, state.ghost.lastEnemyMovedAt)}>
+          {Math.max(state.player.lastEnemyMovedAt, state.ghost.lastEnemyMovedAt)}
+        </i>
+      </div>
+      <div className="lead-pill" data-testid="lead-status" data-value={leadStatus(state)}>
+        {leadStatus(state)}
+      </div>
+      <div className="hud-coins" aria-label={`银币 ${Math.floor(state.player.coins)}`} data-testid="coin-counter">
+        <span className="coin-icon">银</span>
+        <strong>{Math.floor(state.player.coins)}</strong>
+        <small>+{gameConfig.coinRegenPerSecond}/秒</small>
+      </div>
+      <div className="duel-hp-mini">
+        <span data-testid="ghost-guardian-hp">对方 {hpPercent(state.ghost.guardianHp)}%</span>
+        <span data-testid="player-guardian-hp">我方 {hpPercent(state.player.guardianHp)}%</span>
+      </div>
+    </header>
+  )
+}

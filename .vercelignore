@@ -1,0 +1,17 @@
+node_modules
+dist
+test-results
+*.png
+*.jpg
+*.jpeg
+*.docx
+*.xlsx
+*.txt
+*.md
+*.py
+*.cjs
+__pycache__
+direction*_*
+render_*
+新建文件夹
+!src/assets/**

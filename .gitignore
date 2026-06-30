@@ -1,0 +1,25 @@
+.vercel
+node_modules/
+dist/
+test-results/
+*.tsbuildinfo
+
+# Local QA artifacts and planning/source-material files stay off GitHub.
+qa-*.png
+qa-*.json
+qa_*.cjs
+*.png
+*.docx
+*.xlsx
+*.jpg
+*.jpeg
+*.md
+*.txt
+*.py
+__pycache__/
+direction*_*/
+render_*/
+
+# Keep generated app assets if they live under source.
+!src/assets/
+!src/assets/**

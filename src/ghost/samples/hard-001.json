@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "rulesetVersion": "ghost-duel-v1",
+  "configHash": "round5-a81d2f",
+  "ghostId": "ghost-hard-001",
+  "displayName": "冷面军师",
+  "avatarId": "avatar_05",
+  "difficulty": "hard",
+  "seed": "duel-seed-001",
+  "recordedAt": "2026-06-30T00:00:00.000Z",
+  "durationSeconds": 240,
+  "result": "win",
+  "finalGuardianHp": 42,
+  "actions": [
+    { "id": "hard-a1", "at": 0.5, "type": "recruit_batch", "payload": { "expectedBatchIndex": 0 } },
+    {
+      "id": "hard-a2",
+      "at": 1.2,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 0, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-0"
+      }
+    },
+    {
+      "id": "hard-a3",
+      "at": 1.8,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 2, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-1"
+      }
+    },
+    {
+      "id": "hard-a4",
+      "at": 2.4,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 3, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-1"
+      }
+    },
+    {
+      "id": "hard-a5",
+      "at": 3,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 1, "expectedType": "blade", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-0"
+      }
+    },
+    {
+      "id": "hard-a6",
+      "at": 3.8,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 5, "expectedType": "blade", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-2"
+      }
+    },
+    { "id": "hard-a7", "at": 4.4, "type": "merge", "payload": { "fromSlotId": "ghost-left-active-2", "targetSlotId": "ghost-left-active-0", "expectedResultStar": 2 } },
+    { "id": "hard-a8", "at": 6, "type": "unlock_slot", "payload": { "targetSlotId": "ghost-right-locked-0" } },
+    { "id": "hard-a9", "at": 15, "type": "recruit_batch", "payload": { "expectedBatchIndex": 1 } },
+    {
+      "id": "hard-a10",
+      "at": 15.8,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 1, "recruitSlotIndex": 0, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-locked-0"
+      }
+    },
+    {
+      "id": "hard-a11",
+      "at": 16.6,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 1, "recruitSlotIndex": 1, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-2"
+      }
+    },
+    {
+      "id": "hard-a12",
+      "at": 17.4,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 1, "recruitSlotIndex": 2, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-3"
+      }
+    },
+    { "id": "hard-a13", "at": 18.2, "type": "merge", "payload": { "fromSlotId": "ghost-right-active-3", "targetSlotId": "ghost-right-active-2", "expectedResultStar": 2 } }
+  ],
+  "metrics": { "recruitCount": 2, "deployCount": 9, "mergeCount": 2, "unlockCount": 1, "generalCount": 0, "weaponCount": 0 }
+}

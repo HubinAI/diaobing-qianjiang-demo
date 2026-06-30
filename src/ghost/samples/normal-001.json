@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "rulesetVersion": "ghost-duel-v1",
+  "configHash": "round5-a81d2f",
+  "ghostId": "ghost-normal-001",
+  "displayName": "演武对手",
+  "avatarId": "avatar_03",
+  "difficulty": "normal",
+  "seed": "duel-seed-001",
+  "recordedAt": "2026-06-30T00:00:00.000Z",
+  "durationSeconds": 214.5,
+  "result": "win",
+  "finalGuardianHp": 18,
+  "actions": [
+    { "id": "normal-a1", "at": 0.5, "type": "recruit_batch", "payload": { "expectedBatchIndex": 0 } },
+    {
+      "id": "normal-a2",
+      "at": 1.4,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 0, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-0"
+      }
+    },
+    {
+      "id": "normal-a3",
+      "at": 2.2,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 3, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-1"
+      }
+    },
+    {
+      "id": "normal-a4",
+      "at": 3,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 1, "expectedType": "blade", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-0"
+      }
+    },
+    {
+      "id": "normal-a5",
+      "at": 4.5,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 0, "recruitSlotIndex": 5, "expectedType": "blade", "expectedStar": 1 },
+        "targetSlotId": "ghost-left-active-2"
+      }
+    },
+    { "id": "normal-a6", "at": 5.2, "type": "merge", "payload": { "fromSlotId": "ghost-left-active-2", "targetSlotId": "ghost-left-active-0", "expectedResultStar": 2 } },
+    { "id": "normal-a7", "at": 7.5, "type": "unlock_slot", "payload": { "targetSlotId": "ghost-right-locked-0" } },
+    { "id": "normal-a8", "at": 15, "type": "recruit_batch", "payload": { "expectedBatchIndex": 1 } },
+    {
+      "id": "normal-a9",
+      "at": 16,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 1, "recruitSlotIndex": 0, "expectedType": "archer", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-locked-0"
+      }
+    },
+    {
+      "id": "normal-a10",
+      "at": 18,
+      "type": "deploy",
+      "payload": {
+        "item": { "batchIndex": 1, "recruitSlotIndex": 1, "expectedType": "spear", "expectedStar": 1 },
+        "targetSlotId": "ghost-right-active-1"
+      }
+    }
+  ],
+  "metrics": { "recruitCount": 2, "deployCount": 6, "mergeCount": 1, "unlockCount": 1, "generalCount": 0, "weaponCount": 0 }
+}
