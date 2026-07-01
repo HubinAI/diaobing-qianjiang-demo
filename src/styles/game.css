@@ -1262,13 +1262,18 @@ button {
 .deployment-scene-layer .deployment-slot .unit-token small {
   position: absolute;
   left: 50%;
-  bottom: -10px;
+  bottom: 2px;
   transform: translateX(-50%);
   min-width: 36px;
   color: #ffdf6e;
   font-size: 8px;
   line-height: 1;
   text-shadow: 0 1px 3px #000, 0 0 5px rgba(255, 210, 91, 0.55);
+}
+
+.deployment-scene-layer .deployment-slot[data-slot-id*="-aux-"] .unit-token small {
+  font-size: 6px;
+  bottom: 0px;
 }
 
 .is-draggable {
