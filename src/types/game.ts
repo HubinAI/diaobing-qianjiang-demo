@@ -73,6 +73,9 @@ export interface HitEffect {
   text: string
   kind: 'hit' | 'kill' | 'sweep' | 'volley' | 'thrust'
   at: number
+  sourceUnitId?: string
+  order?: number
+  damageRatio?: number
 }
 
 export interface AttackImpact {
@@ -80,6 +83,7 @@ export interface AttackImpact {
   damage: number
   damageRatio: number
   order: number
+  point: WorldPoint
 }
 
 export interface AttackTrace {

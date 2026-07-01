@@ -292,6 +292,7 @@ function processAttacks(state: GameState): GameState {
           damage: profile.attack * damageRatio,
           damageRatio,
           order: index,
+          point: target.point,
         }
       })
       const trace = createAttackTrace(state, currentUnit, profile.troopType, geometry, targets, targetImpacts)
@@ -303,12 +304,13 @@ function processAttacks(state: GameState): GameState {
         damage: profile.attack * damageRatio,
         damageRatio,
         order: index,
+        point: target.point,
       }))
       const trace = createAttackTrace(state, currentUnit, profile.troopType, geometry, targets, targetImpacts)
       if (trace) attackTraces = [...attackTraces, trace]
     } else {
       const trace = createAttackTrace(state, currentUnit, profile.troopType, geometry, [targets[0]], [
-        { enemyId: targets[0].enemy.id, damage: profile.attack, damageRatio: 1, order: 0 },
+        { enemyId: targets[0].enemy.id, damage: profile.attack, damageRatio: 1, order: 0, point: targets[0].point },
       ])
       if (trace) attackTraces = [...attackTraces, trace]
     }
@@ -352,7 +354,7 @@ function processAttackImpacts(state: GameState): GameState {
         enemies = result.enemies
         totalKills = result.totalKills
         if (result.effect) {
-          hitEffects = [...hitEffects, { ...result.effect, kind: hitKindForTrace(trace) }]
+          hitEffects = [...hitEffects, { ...result.effect, kind: hitKindForTrace(trace), sourceUnitId: trace.sourceUnitId, order: impact.order, damageRatio: impact.damageRatio }]
           lastMeaningfulProgressAt = state.elapsedSeconds
         }
         if (result.coinEffect) {
@@ -415,6 +417,7 @@ function processGeneralSkills(state: GameState): GameState {
   let lastEffect = state.lastEffect
   let hitEffects = state.hitEffects.filter((effect) => state.elapsedSeconds - effect.at < 0.75)
   let coinFlyEffects = state.coinFlyEffects
+  let attackTraces = state.attackTraces
   let lastMeaningfulProgressAt = state.lastMeaningfulProgressAt
   const huangzhong = Object.values(state.generals).find((general) => general.generalId === 'huangzhong')
 
@@ -458,19 +461,17 @@ function processGeneralSkills(state: GameState): GameState {
     const geometry = getAttackGeometryForUnit(state, zhaoyun)
     const targets = geometry ? getTargetsInAttackArea(Object.values(enemies), geometry).slice(0, gameConfig.generalSkills.zhaoyunThrustTargets) : []
 
-    targets.forEach((target) => {
-      const result = applySkillDamage(state, enemies, totalKills, target.enemy.id, gameConfig.generalSkills.zhaoyunThrustDamage)
-      enemies = result.enemies
-      totalKills = result.totalKills
-      if (result.effect) {
-        hitEffects = [...hitEffects, { ...result.effect, kind: 'thrust', text: result.effect.text.startsWith('+') ? result.effect.text : `刺${result.effect.text}` }]
-        lastMeaningfulProgressAt = state.elapsedSeconds
-      }
-      if (result.coinEffect) {
-        coinFlyEffects = [...coinFlyEffects, result.coinEffect]
-        lastMeaningfulProgressAt = state.elapsedSeconds
-      }
-    })
+    if (geometry && targets.length > 0) {
+      const targetImpacts = targets.map((target, index) => ({
+        enemyId: target.enemy.id,
+        damage: gameConfig.generalSkills.zhaoyunThrustDamage,
+        damageRatio: 1,
+        order: index,
+        point: target.point,
+      }))
+      const trace = createAttackTrace(state, zhaoyun, 'spear', geometry, targets, targetImpacts)
+      if (trace) attackTraces = [...attackTraces, trace]
+    }
 
     nextGeneralSkillAt.zhaoyun = state.elapsedSeconds + gameConfig.generalSkills.zhaoyunThrustSeconds
     if (targets.length > 0) lastEffect = { id: `${state.elapsedSeconds}-thrust`, text: '突刺', at: state.elapsedSeconds }
@@ -482,6 +483,7 @@ function processGeneralSkills(state: GameState): GameState {
     nextGeneralSkillAt,
     lastEffect,
     hitEffects: hitEffects.slice(-36),
+    attackTraces: attackTraces.slice(-50),
     coinFlyEffects: coinFlyEffects.slice(-30),
     lastMeaningfulProgressAt,
     metrics: {

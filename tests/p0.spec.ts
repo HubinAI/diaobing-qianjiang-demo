@@ -167,6 +167,31 @@ test('spawns four mirrored enemy paths from left and right sides', async ({ page
   expect(movedGhostLeft.progress).toBeGreaterThan(ghostLeft.progress)
 })
 
+test('renders spear thrust visuals from the shared attack geometry', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__gameDebug!.setReserveItems([{ id: 'visual-spear', type: 'troop', troopType: 'spear', star: 1 }])
+  })
+  await page.getByTestId('recruit-slot-0').locator('.reserve-item').dragTo(page.getByTestId('player-left-active-2'))
+  await page.evaluate(() => {
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.36)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.4)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.44)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.48)
+    window.__gameDebug!.advanceTime(0.05)
+  })
+
+  const thrust = page.getByTestId('attack-trace-thrust').first()
+  await expect(thrust).toBeVisible()
+  const geometry = JSON.parse((await thrust.getAttribute('data-geometry'))!)
+  expect(geometry.shape).toBe('strip')
+  expect(geometry.lengthRatio).toBeCloseTo(0.27)
+  expect(geometry.widthRatio).toBeCloseTo(0.075)
+  await expect(page.getByTestId('spear-thrust-body').first()).toHaveAttribute('data-facing-angle-deg', String(geometry.facingAngleDeg))
+  await expect(page.getByTestId('spear-beam-core').first()).toHaveAttribute('data-length-ratio', String(geometry.lengthRatio))
+  await expect(page.getByTestId('spear-impact-marker')).toHaveCount(4)
+  await expect(page.getByTestId('pierce-count')).toContainText('贯穿×4')
+})
+
 test('settles win, loss, draw and restarts', async ({ page }) => {
   await page.evaluate(() => {
     window.__gameDebug!.setGuardianHp('ghost', 0)
