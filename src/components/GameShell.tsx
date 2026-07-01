@@ -195,7 +195,7 @@ export function GameShell({ state, dispatch }: GameShellProps) {
     <div className="game-page" data-testid="game-root">
       <div className="phone-frame" ref={phoneFrameRef}>
         <TopHud state={state} />
-        <div ref={battlefieldRef}>
+        <div ref={battlefieldRef} className="battlefield">
           <Battlefield
             state={state}
             isDragging={Boolean(drag)}
