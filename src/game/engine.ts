@@ -117,8 +117,43 @@ const leftSlotAnchors: SlotAnchor[] = [
   },
 ]
 
+const leftAuxSlotAnchors: SlotAnchor[] = [
+  {
+    baseId: 'left-aux-active-0',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 7,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.735 },
+    offset: { x: -0.31, y: 0 },
+    targetPoint: { x: 0.08, y: leftRoad.horizontal.start.y },
+  },
+  {
+    baseId: 'left-aux-locked-0',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: false,
+    index: 8,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.85 },
+    offset: { x: -0.31, y: 0 },
+  },
+  {
+    baseId: 'left-aux-locked-1',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: false,
+    index: 9,
+    roadPoint: { x: leftRoad.vertical.end.x, y: leftRoad.vertical.end.y },
+    offset: { x: -0.225, y: 0.005 },
+  },
+]
+
 const leftSlotPlan: SlotTemplate[] = [
   ...leftSlotAnchors.map(slotFromRoad),
+  ...leftAuxSlotAnchors.map(slotFromRoad),
 ]
 
 const centerSlotPlan: SlotTemplate[] = [
@@ -204,8 +239,8 @@ export function createInitialMetrics(seed: string): RunMetrics {
     mergeCount: 0,
     crossLaneMoveCount: 0,
     shovelUseCount: 0,
-    unlockedSlotCount: 11,
-    maxUnlockedSlots: 11,
+    unlockedSlotCount: 13,
+    maxUnlockedSlots: 13,
     generalsObtained: [],
     generalStarLevels: {},
     exclusiveWeaponsEquipped: [],

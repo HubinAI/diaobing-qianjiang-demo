@@ -56,19 +56,19 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   expect(guardianRatio).toBeGreaterThanOrEqual(0.08)
   expect(guardianRatio).toBeLessThanOrEqual(0.12)
 
-  await expect(page.locator('[data-side-id="player"]')).toHaveCount(16)
-  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(16)
+  await expect(page.locator('[data-side-id="player"]')).toHaveCount(22)
+  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(22)
   await expect(page.getByTestId('path-player-left')).toBeVisible()
   await expect(page.getByTestId('path-player-right')).toBeVisible()
   await expect(page.getByTestId('path-ghost-left')).toBeVisible()
   await expect(page.getByTestId('path-ghost-right')).toBeVisible()
 
   const state = await debugState(page)
-  expect(state.player.slots.filter((slot) => slot.zone === 'left')).toHaveLength(7)
+  expect(state.player.slots.filter((slot) => slot.zone === 'left')).toHaveLength(10)
   expect(state.player.slots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
-  expect(state.player.slots.filter((slot) => slot.zone === 'right')).toHaveLength(7)
-  expect(state.player.slots.filter((slot) => slot.unlocked)).toHaveLength(11)
-  expect(state.player.slots.filter((slot) => !slot.unlocked)).toHaveLength(5)
+  expect(state.player.slots.filter((slot) => slot.zone === 'right')).toHaveLength(10)
+  expect(state.player.slots.filter((slot) => slot.unlocked)).toHaveLength(13)
+  expect(state.player.slots.filter((slot) => !slot.unlocked)).toHaveLength(9)
   state.player.slots.forEach((slot, index) => {
     const ghost = state.ghost.slots[index]
     expect(ghost.x).toBeCloseTo(slot.x)
@@ -99,7 +99,7 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     for (let outer = 0; outer < slots.length; outer += 1) {
       for (let inner = outer + 1; inner < slots.length; inner += 1) {
         const distance = Math.hypot(slots[outer].x - slots[inner].x, slots[outer].y - slots[inner].y)
-        const currentGap = distance - Math.max(slots[outer].size, slots[inner].size)
+        const currentGap = distance - (slots[outer].size + slots[inner].size) / 2
         if (currentGap < gap) {
           gap = currentGap
           pair = `${slots[outer].id}/${slots[inner].id}`
@@ -161,9 +161,10 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     })
   })
   layoutRelation.forEach((slot) => {
-    expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(24)
+    const isAux = slot.id.includes('-aux-')
+    expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(isAux ? 12 : 24)
     expect(slot.roadDistance, slot.id).toBeGreaterThanOrEqual(0.105)
-    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(0.24)
+    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(isAux ? 0.34 : 0.24)
     expect(slot.facingDot, slot.id).toBeGreaterThan(0.04)
   })
 })

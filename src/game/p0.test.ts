@@ -112,14 +112,14 @@ describe('round 5 ghost duel core', () => {
 
     const playerSlots = createInitialSlots('player')
     const ghostSlots = createInitialSlots('ghost')
-    expect(slotLayoutVersion).toBe(2)
-    expect(playerSlots).toHaveLength(16)
-    expect(ghostSlots).toHaveLength(16)
-    expect(playerSlots.filter((slot) => slot.unlocked)).toHaveLength(11)
-    expect(playerSlots.filter((slot) => !slot.unlocked)).toHaveLength(5)
-    expect(playerSlots.filter((slot) => slot.zone === 'left')).toHaveLength(7)
+    expect(slotLayoutVersion).toBe(3)
+    expect(playerSlots).toHaveLength(22)
+    expect(ghostSlots).toHaveLength(22)
+    expect(playerSlots.filter((slot) => slot.unlocked)).toHaveLength(13)
+    expect(playerSlots.filter((slot) => !slot.unlocked)).toHaveLength(9)
+    expect(playerSlots.filter((slot) => slot.zone === 'left')).toHaveLength(10)
     expect(playerSlots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
-    expect(playerSlots.filter((slot) => slot.zone === 'right')).toHaveLength(7)
+    expect(playerSlots.filter((slot) => slot.zone === 'right')).toHaveLength(10)
 
     playerSlots.forEach((slot, index) => {
       expect(ghostSlots[index].x).toBeCloseTo(slot.x)
@@ -139,15 +139,27 @@ describe('round 5 ghost duel core', () => {
       expect(right.facingAngleDeg).toBeCloseTo(((180 - left.facingAngleDeg + 180) % 360 + 360) % 360 - 180)
     }
 
+    ;(['active-0', 'locked-0', 'locked-1'] as const).forEach((suffix) => {
+      const left = playerSlots.find((slot) => slot.id === `player-left-aux-${suffix}`)!
+      const right = playerSlots.find((slot) => slot.id === `player-right-aux-${suffix}`)!
+      expect(left).toBeDefined()
+      expect(right).toBeDefined()
+      expect(left.unlocked).toBe(suffix === 'active-0')
+      expect(right.unlocked).toBe(suffix === 'active-0')
+      expect(right.x).toBeCloseTo(1 - left.x)
+      expect(right.y).toBeCloseTo(left.y)
+    })
+
     const sideSlots = playerSlots.filter((slot) => slot.zone !== 'center')
     sideSlots.forEach((slot) => {
-      expect(slot.x).toBeGreaterThanOrEqual(0.12)
-      expect(slot.x).toBeLessThanOrEqual(0.88)
+      const isAux = slot.id.includes('-aux-')
+      expect(slot.x).toBeGreaterThanOrEqual(isAux ? 0.07 : 0.12)
+      expect(slot.x).toBeLessThanOrEqual(isAux ? 0.93 : 0.88)
       const road = slot.zone === 'left' ? playerPathPoints.left : playerPathPoints.right
       const pathId = pathIdFor('player', slot.zone as 'left' | 'right')
       const closest = closestPointOnPath(slot, road)
       expect(closest.distance, slot.id).toBeGreaterThanOrEqual(requiredRoadClearanceForPoint(slot, pathId))
-      expect(closest.distance, slot.id).toBeLessThanOrEqual(0.24)
+      expect(closest.distance, slot.id).toBeLessThanOrEqual(isAux ? 0.34 : 0.24)
       expect(facingDot(slot, closest.point), slot.id).toBeGreaterThan(0.04)
     })
 
@@ -165,15 +177,17 @@ describe('round 5 ghost duel core', () => {
         expect(nearest.closest.distance, slot.id).toBeGreaterThanOrEqual(roadClearanceConfig.minimumRatio)
       })
 
-    const slotSize = 36
+    const slotSize = (id: string) => id.includes('-aux-') ? 26 : 36
     for (let outer = 0; outer < playerSlots.length; outer += 1) {
       for (let inner = outer + 1; inner < playerSlots.length; inner += 1) {
-        expect(pixelDistance(playerSlots[outer], playerSlots[inner])).toBeGreaterThanOrEqual(slotSize)
+        const requiredDistance = (slotSize(playerSlots[outer].id) + slotSize(playerSlots[inner].id)) / 2
+        expect(pixelDistance(playerSlots[outer], playerSlots[inner])).toBeGreaterThanOrEqual(requiredDistance)
       }
     }
 
     expect(mapLegacySlotId('ghost-left-active-2')).toBe('ghost-left-active-2')
     expect(mapLegacySlotId('ghost-right-locked-0')).toBe('ghost-right-locked-0')
+    expect(mapLegacySlotId('ghost-left-aux-locked-1')).toBe('ghost-left-aux-locked-1')
   })
 
   it('keeps enemy movement independent from occupied deployment slots', () => {
