@@ -52,15 +52,6 @@ export function TopHud({ state }: TopHudProps) {
       <div className="lead-pill" data-testid="lead-status" data-value={leadStatus(state)}>
         {leadStatus(state)}
       </div>
-      <div className="hud-coins" aria-label={`银币 ${Math.floor(state.player.coins)}`} data-testid="coin-counter">
-        <span className="coin-icon">银</span>
-        <strong>{Math.floor(state.player.coins)}</strong>
-        <small>+{gameConfig.coinRegenPerSecond}/秒</small>
-      </div>
-      <div className="duel-hp-mini">
-        <span data-testid="ghost-guardian-hp">对方 {ghostHpPercent}%</span>
-        <span data-testid="player-guardian-hp">我方 {hpPercent(state.player.guardianHp)}%</span>
-      </div>
     </header>
   )
 }

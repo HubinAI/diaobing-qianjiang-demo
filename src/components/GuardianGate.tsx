@@ -11,34 +11,25 @@ function hpPercent(hp: number) {
 
 export function GuardianGate({ state }: GuardianGateProps) {
   const playerHp = hpPercent(state.player.guardianHp)
-  const ghostHp = hpPercent(state.ghost.guardianHp)
+  const crisisText = playerHp <= 30 ? '危机' : '守稳'
 
   return (
-    <section className="guardian-gate duel-guardian-gate" aria-label="双方守护目标">
-      <div className={`diaochan-avatar ghost-diaochan ${ghostHp <= 30 ? 'is-danger' : ''}`} data-testid="ghost-diaochan-avatar">
+    <section className={`guardian-gate duel-guardian-gate ${playerHp <= 30 ? 'is-danger' : ''}`} aria-label="我方貂蝉状态" data-testid="player-guardian-zone">
+      <div className={`diaochan-avatar ${playerHp <= 30 ? 'is-danger' : ''}`} data-testid="diaochan-avatar">
         <span>貂</span>
       </div>
       <div className="guardian-info">
         <div className="guardian-title">
-          <span>对方貂蝉</span>
-          <strong>{Math.ceil(ghostHp)}%</strong>
-        </div>
-        <div className="hp-track ghost-track">
-          <div className="hp-fill ghost-fill" style={{ width: `${ghostHp}%` }} />
-        </div>
-      </div>
-      <div className="guardian-info">
-        <div className="guardian-title">
           <span>我方貂蝉</span>
-          <strong>{Math.ceil(playerHp)}%</strong>
+          <strong data-testid="player-guardian-hp">{Math.ceil(playerHp)}%</strong>
         </div>
         <div className="hp-track">
           <div className="hp-fill" style={{ width: `${playerHp}%` }} />
         </div>
       </div>
-      <div className={`diaochan-avatar ${playerHp <= 30 ? 'is-danger' : ''}`} data-testid="diaochan-avatar">
-        <span>貂</span>
-      </div>
+      <strong className="guardian-crisis" data-testid="player-guardian-crisis" data-value={crisisText}>
+        {crisisText}
+      </strong>
     </section>
   )
 }
