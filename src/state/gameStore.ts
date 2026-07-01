@@ -201,8 +201,9 @@ function recruit(state: GameState, confirmed = false): GameState {
       : state.metrics.averageSecondsBetweenRecruit === 0
         ? interval
         : (state.metrics.averageSecondsBetweenRecruit * (batchRecruitCount - 2) + interval) / (batchRecruitCount - 1)
+  const replacementToast = recycledCount > 0 ? `已替换${recycledCount}个未使用内容` : undefined
 
-  return markEffect({
+  return {
     ...state,
     coins: state.coins - recruitCost,
     recruitRngState: result.recruitRngState,
@@ -210,8 +211,8 @@ function recruit(state: GameState, confirmed = false): GameState {
     reserveItems,
     pendingRecruitConfirmation: false,
     selectedShovel: undefined,
-    toast: recycledCount > 0 ? `本轮补兵：替换${recycledCount}个未使用内容` : '本轮补兵：刷新6格',
-    toastUntil: state.elapsedSeconds + 1.2,
+    toast: replacementToast,
+    toastUntil: replacementToast ? state.elapsedSeconds + 1 : 0,
     metrics: {
       ...state.metrics,
       batchRecruitCount,
@@ -223,7 +224,7 @@ function recruit(state: GameState, confirmed = false): GameState {
       lastRecruitAt: state.elapsedSeconds,
       recruitCount: batchRecruitCount,
     },
-  }, '补兵')
+  }
 }
 
 function mergeReserveTroop(state: GameState, sourceItem: Extract<ReserveItem, { type: 'troop' }>, targetItem: Extract<ReserveItem, { type: 'troop' }>) {

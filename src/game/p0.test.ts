@@ -235,6 +235,45 @@ describe('round 5 ghost duel core', () => {
     }
   })
 
+  it('keeps ordinary recruit replacement feedback player scoped and temporary', () => {
+    let state = createInitialDuelState('recruit-toast-seed', 'playing')
+    state = {
+      ...state,
+      player: {
+        ...state.player,
+        coins: 1000,
+        reserveItems: [troopItem('old-blade', 'blade'), troopItem('old-spear', 'spear')],
+      },
+    }
+
+    state = duelReducer(state, { type: 'recruit', confirmed: true })
+    expect(state.toast).toBe('已替换2个未使用内容')
+    expect(state.toast).not.toContain('本轮补兵')
+    expect(state.toastUntil - state.elapsedSeconds).toBeCloseTo(1)
+    expect(state.lastEffect?.text).not.toBe('补兵')
+
+    state = duelReducer(state, { type: 'advanceTime', seconds: 1.1 })
+    expect(state.toast).toBeUndefined()
+
+    const ghostInitial = {
+      ...createInitialDuelState('ghost-recruit-toast-seed', 'playing'),
+      ghost: {
+        ...createInitialDuelState('ghost-recruit-toast-seed', 'playing').ghost,
+        coins: 1000,
+        reserveItems: [troopItem('ghost-old-blade', 'blade')],
+      },
+    }
+    const ghostResult = executeGameCommand(ghostInitial, {
+      sideId: 'ghost',
+      source: 'ghost',
+      type: 'recruit_batch',
+      payload: { expectedBatchIndex: 0 },
+    })
+    expect(ghostResult.ok).toBe(true)
+    expect(ghostResult.state!.toast).toBeUndefined()
+    expect(ghostResult.state!.lastEffect).toBeUndefined()
+  })
+
   it('uses the same command bus for ghost recruit, deploy, merge and unlock', () => {
     let state = createInitialDuelState('duel-seed-001', 'playing')
     state = { ...state, ghost: { ...state.ghost, coins: 1000 } }

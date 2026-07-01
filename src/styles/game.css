@@ -1702,8 +1702,8 @@ button {
 .toast-message {
   position: absolute;
   left: 50%;
-  top: 126px;
-  bottom: auto;
+  top: auto;
+  bottom: 145px;
   z-index: 30;
   max-width: 88%;
   transform: translateX(-50%);
@@ -1715,6 +1715,7 @@ button {
   font-size: 12px;
   font-weight: 900;
   text-align: center;
+  pointer-events: none;
 }
 
 .effect-pop {

@@ -85,6 +85,7 @@ function syncSide(state: DuelGameState, sideId: SideId): GameState {
 }
 
 function withSide(state: DuelGameState, sideId: SideId, side: GameState): DuelGameState {
+  const shouldSurfacePlayerFeedback = sideId === 'player'
   return {
     ...state,
     [sideId]: side,
@@ -98,9 +99,9 @@ function withSide(state: DuelGameState, sideId: SideId, side: GameState): DuelGa
         ? undefined
         : state.selectedShovel,
     pendingRecruitConfirmationSide: side.pendingRecruitConfirmation ? sideId : state.pendingRecruitConfirmationSide === sideId ? undefined : state.pendingRecruitConfirmationSide,
-    toast: side.toast ?? state.toast,
-    toastUntil: Math.max(state.toastUntil, side.toastUntil),
-    lastEffect: side.lastEffect ? { ...side.lastEffect, sideId } : state.lastEffect,
+    toast: shouldSurfacePlayerFeedback ? side.toast : state.toast,
+    toastUntil: shouldSurfacePlayerFeedback ? side.toastUntil : state.toastUntil,
+    lastEffect: shouldSurfacePlayerFeedback && side.lastEffect ? { ...side.lastEffect, sideId } : state.lastEffect,
   }
 }
 
@@ -357,6 +358,9 @@ function tickDuel(state: DuelGameState, deltaSeconds: number): DuelGameState {
   let next: DuelGameState = {
     ...state,
     elapsedSeconds: state.elapsedSeconds + delta,
+  }
+  if (next.toast && next.elapsedSeconds >= next.toastUntil) {
+    next = { ...next, toast: undefined }
   }
   next = {
     ...next,

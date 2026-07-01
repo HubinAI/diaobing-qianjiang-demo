@@ -196,6 +196,32 @@ test('uses same seed for equal recruit batches and no hidden ghost resources', a
   expect(ghostBatchAfterDeploy).toEqual(playerBatch)
 })
 
+test('keeps ordinary recruit replacement notice out of the battlefield center', async ({ page }) => {
+  await expect(page.getByText(/本轮补兵：/)).toHaveCount(0)
+  await page.evaluate(() => {
+    window.__gameDebug!.setCoins(1000)
+    window.__gameDebug!.setReserveItems([
+      { id: 'old-blade', type: 'troop', troopType: 'blade', star: 1 },
+      { id: 'old-spear', type: 'troop', troopType: 'spear', star: 1 },
+    ])
+    window.__gameDebug!.recruitBatch(true)
+  })
+
+  await expect(page.getByText(/本轮补兵：/)).toHaveCount(0)
+  const toast = page.locator('.toast-message')
+  await expect(toast).toHaveCount(1)
+  await expect(toast).toContainText('已替换2个未使用内容')
+  const positions = await page.evaluate(() => {
+    const field = document.querySelector<HTMLElement>('[data-testid="duel-root"]')!.getBoundingClientRect()
+    const toast = document.querySelector<HTMLElement>('.toast-message')!.getBoundingClientRect()
+    return { fieldBottom: field.bottom, toastTop: toast.top }
+  })
+  expect(positions.toastTop).toBeGreaterThan(positions.fieldBottom)
+
+  await page.evaluate(() => window.__gameDebug!.advanceTime(1.1))
+  await expect(toast).toHaveCount(0)
+})
+
 test('replays ghost actions on simulated time and respects pause/resume', async ({ page }) => {
   await page.evaluate(() => window.__gameDebug!.advanceTime(0.6))
   let state = await debugState(page)
