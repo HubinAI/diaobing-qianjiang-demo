@@ -172,6 +172,7 @@ export interface GameState {
   phase: 'idle' | 'playing' | 'paused' | 'won' | 'lost'
   seed: string
   rngState: number
+  recruitRngState: number
   elapsedSeconds: number
   speedMultiplier: number
   waveIndex: number

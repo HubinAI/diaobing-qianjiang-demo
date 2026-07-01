@@ -15,10 +15,18 @@ interface RecruitResult {
 interface RecruitBatchResult {
   items: ReserveItem[]
   rngState: number
+  recruitRngState: number
   recruitsSinceGeneral: number
 }
 
-type WeightedKey = TroopType | 'general' | 'exclusiveWeapon'
+type RecruitCategory = 'troop' | 'general' | 'weapon'
+type WeightedTroop = TroopType
+
+const troopWeights = [
+  { key: 'blade', weight: gameConfig.recruitWeights.blade },
+  { key: 'spear', weight: gameConfig.recruitWeights.spear },
+  { key: 'archer', weight: gameConfig.recruitWeights.archer },
+] satisfies Array<{ key: WeightedTroop; weight: number }>
 
 export function nextRandom(rngState: number): RandomStep {
   const state = rngState + 0x6d2b79f5
@@ -45,7 +53,7 @@ function chooseFrom<T>(items: T[], rngState: number): { item: T; rngState: numbe
   return { item: items[index], rngState: step.nextState }
 }
 
-function weightedChoice(weights: Array<{ key: WeightedKey; weight: number }>, rngState: number) {
+function weightedChoice<T extends string>(weights: Array<{ key: T; weight: number }>, rngState: number) {
   const total = weights.reduce((sum, item) => sum + item.weight, 0)
   const step = nextRandom(rngState)
   let cursor = step.value * total
@@ -62,65 +70,70 @@ function getGeneralStar(state: GameState, generalId: GeneralId): number {
   return Object.values(state.generals).find((general) => general.generalId === generalId)?.star ?? 0
 }
 
-function getAvailableGenerals(state: GameState): GeneralId[] {
+export function getAvailableGenerals(state: GameState): GeneralId[] {
   return (Object.keys(generalConfig) as GeneralId[]).filter((generalId) => getGeneralStar(state, generalId) < gameConfig.maxGeneralStar)
 }
 
-function getAvailableWeapons(state: GameState): WeaponId[] {
-  const reserveWeaponIds = new Set(
-    state.reserveItems.filter((item): item is Extract<ReserveItem, { type: 'weapon' }> => item.type === 'weapon').map((item) => item.weaponId),
-  )
+export function getAvailableWeapons(state: GameState): WeaponId[] {
   return (Object.keys(weaponConfig) as WeaponId[]).filter((weaponId) => {
     const config = weaponConfig[weaponId]
     const general = Object.values(state.generals).find((unit) => unit.generalId === config.generalId)
-    return Boolean(general && !general.equippedWeapon && !reserveWeaponIds.has(weaponId))
+    return Boolean(general && !general.equippedWeapon)
   })
 }
 
-function buildWeights(state: GameState) {
+export function buildRecruitCategoryWeights(state: GameState) {
   const generalAvailable = state.waveIndex >= 4 && getAvailableGenerals(state).length > 0
   const weaponAvailable = state.waveIndex >= 6 && getAvailableWeapons(state).length > 0
+  const weights: Array<{ key: RecruitCategory; weight: number }> = []
 
   if (weaponAvailable) {
-    return [
-      { key: 'blade', weight: 26 },
-      { key: 'spear', weight: 26 },
-      { key: 'archer', weight: 26 },
-      { key: 'general', weight: 14 },
-      { key: 'exclusiveWeapon', weight: 8 },
-    ] satisfies Array<{ key: WeightedKey; weight: number }>
+    weights.push({ key: 'troop', weight: 78 })
+    if (generalAvailable) weights.push({ key: 'general', weight: 14 })
+    weights.push({ key: 'weapon', weight: gameConfig.recruitWeights.exclusiveWeapon })
+    return weights
   }
 
   if (generalAvailable) {
     return [
-      { key: 'blade', weight: 28 },
-      { key: 'spear', weight: 28 },
-      { key: 'archer', weight: 28 },
+      { key: 'troop', weight: 84 },
       { key: 'general', weight: gameConfig.recruitWeights.general },
-    ] satisfies Array<{ key: WeightedKey; weight: number }>
+    ] satisfies Array<{ key: RecruitCategory; weight: number }>
   }
 
-  return [
-    { key: 'blade', weight: gameConfig.recruitWeights.blade },
-    { key: 'spear', weight: gameConfig.recruitWeights.spear },
-    { key: 'archer', weight: gameConfig.recruitWeights.archer },
-  ] satisfies Array<{ key: WeightedKey; weight: number }>
+  return [{ key: 'troop', weight: 100 }] satisfies Array<{ key: RecruitCategory; weight: number }>
+}
+
+function nextPityCount(current: number, generalAvailable: boolean, drewGeneral: boolean) {
+  if (!generalAvailable) return current
+  return drewGeneral ? 0 : current + 1
+}
+
+function chooseTroopType(rngState: number) {
+  return weightedChoice(troopWeights, rngState)
 }
 
 export function drawRecruitItem(state: GameState): RecruitResult {
-  const availableGenerals = getAvailableGenerals(state)
-  let rngState = state.rngState
-  let key: WeightedKey
+  const availableGenerals = state.waveIndex >= 4 ? getAvailableGenerals(state) : []
+  const availableWeapons = state.waveIndex >= 6 ? getAvailableWeapons(state) : []
+  const generalAvailable = availableGenerals.length > 0
+  let rngState = state.recruitRngState ?? state.rngState
+  let category: RecruitCategory
 
-  if (state.waveIndex >= 4 && state.recruitsSinceGeneral >= 12 && availableGenerals.length > 0) {
-    key = 'general'
+  if (state.waveIndex >= 4 && state.recruitsSinceGeneral >= 12 && generalAvailable) {
+    category = 'general'
   } else {
-    const choice = weightedChoice(buildWeights(state), rngState)
-    key = choice.key
-    rngState = choice.rngState
+    const weights = buildRecruitCategoryWeights(state)
+    if (weights.length === 1 && weights[0].key === 'troop') {
+      category = 'troop'
+    } else {
+      const choice = weightedChoice(weights, rngState)
+      category = choice.key
+      rngState = choice.rngState
+    }
   }
 
-  if (key === 'general') {
+  if (category === 'general') {
     const generalChoice = chooseFrom(availableGenerals, rngState)
     const idResult = randomId('reserve-general', generalChoice.rngState)
     return {
@@ -130,21 +143,22 @@ export function drawRecruitItem(state: GameState): RecruitResult {
     }
   }
 
-  if (key === 'exclusiveWeapon') {
-    const weaponChoice = chooseFrom(getAvailableWeapons(state), rngState)
+  if (category === 'weapon') {
+    const weaponChoice = chooseFrom(availableWeapons, rngState)
     const idResult = randomId('reserve-weapon', weaponChoice.rngState)
     return {
       item: { id: idResult.id, type: 'weapon', weaponId: weaponChoice.item },
       rngState: idResult.rngState,
-      recruitsSinceGeneral: state.recruitsSinceGeneral + 1,
+      recruitsSinceGeneral: nextPityCount(state.recruitsSinceGeneral, generalAvailable, false),
     }
   }
 
-  const idResult = randomId('reserve-troop', rngState)
+  const troopChoice = chooseTroopType(rngState)
+  const idResult = randomId('reserve-troop', troopChoice.rngState)
   return {
-    item: { id: idResult.id, type: 'troop', troopType: key, star: 1 },
+    item: { id: idResult.id, type: 'troop', troopType: troopChoice.key, star: 1 },
     rngState: idResult.rngState,
-    recruitsSinceGeneral: state.recruitsSinceGeneral + 1,
+    recruitsSinceGeneral: nextPityCount(state.recruitsSinceGeneral, generalAvailable, false),
   }
 }
 
@@ -154,28 +168,26 @@ export function drawRecruitBatch(state: GameState, count: number): RecruitBatchR
     reserveItems: [],
   }
   const items: ReserveItem[] = []
-  let rngState = state.rngState
-  const shouldForceGeneral = state.waveIndex >= 4 && state.recruitsSinceGeneral >= 12
+  let rngState = state.recruitRngState ?? state.rngState
+  let recruitsSinceGeneral = state.recruitsSinceGeneral
 
   for (let index = 0; index < count; index += 1) {
     const result = drawRecruitItem({
       ...nextState,
-      rngState,
-      recruitsSinceGeneral: shouldForceGeneral && index === 0 ? 12 : 0,
+      recruitRngState: rngState,
+      recruitsSinceGeneral,
       reserveItems: items,
     })
     items.push(result.item)
     rngState = result.rngState
+    recruitsSinceGeneral = result.recruitsSinceGeneral
     nextState = {
       ...nextState,
-      rngState,
-      recruitsSinceGeneral: 0,
+      recruitRngState: rngState,
+      recruitsSinceGeneral,
       reserveItems: items,
     }
   }
 
-  const hasGeneral = items.some((item) => item.type === 'general')
-  const recruitsSinceGeneral = hasGeneral ? 0 : state.recruitsSinceGeneral + 1
-
-  return { items, rngState, recruitsSinceGeneral }
+  return { items, rngState, recruitRngState: rngState, recruitsSinceGeneral }
 }

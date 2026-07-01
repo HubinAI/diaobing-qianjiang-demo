@@ -205,7 +205,7 @@ function recruit(state: GameState, confirmed = false): GameState {
   return markEffect({
     ...state,
     coins: state.coins - recruitCost,
-    rngState: result.rngState,
+    recruitRngState: result.recruitRngState,
     recruitsSinceGeneral: result.recruitsSinceGeneral,
     reserveItems,
     pendingRecruitConfirmation: false,

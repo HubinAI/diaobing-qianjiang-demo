@@ -104,10 +104,12 @@ export function hashSeed(seed: string): number {
 }
 
 export function createInitialGameState(seed = 'diaobing-001', phase: GameState['phase'] = 'idle', sideId: SideId = 'player'): GameState {
+  const initialRngState = hashSeed(seed)
   return {
     phase,
     seed,
-    rngState: hashSeed(seed),
+    rngState: initialRngState,
+    recruitRngState: initialRngState,
     elapsedSeconds: 0,
     speedMultiplier: 1,
     waveIndex: 1,
