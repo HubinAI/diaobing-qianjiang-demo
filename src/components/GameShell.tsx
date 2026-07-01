@@ -15,12 +15,10 @@ import { TopHud } from './TopHud'
 
 interface TutorialStep {
   id: number
-  target: string            // CSS selector for the element to highlight
+  target: string
   title: string
   description: string
-  requireAction: boolean    // whether the player must perform an action to advance
-  advanceCondition?: () => boolean
-  position: 'top' | 'bottom' | 'left' | 'right'
+  arrowDir: 'up' | 'down'
 }
 
 interface GameShellProps {
@@ -28,51 +26,42 @@ interface GameShellProps {
   dispatch: React.Dispatch<GameAction>
 }
 
-// 引导步骤定义
-function buildTutorialSteps(state: DuelGameState): TutorialStep[] {
+function buildTutorialSteps(): TutorialStep[] {
   return [
     {
       id: 1,
       target: '.recruit-button',
       title: '招募士兵',
-      description: '点击这里消耗银币招募 6 个单位。每次招募会随机产出刀兵、枪兵、弓兵，运气好还会出现武将或专属武器。',
-      requireAction: true,
-      advanceCondition: () => state.player.reserveItems.length > 0,
-      position: 'top',
+      description: '点击这里消耗银币招募 6 个单位',
+      arrowDir: 'up',
     },
     {
       id: 2,
       target: '.reserve-section',
       title: '预备栏',
-      description: '招募到的单位会出现在这里。拖拽单位到战场上的绿色槽位即可部署。两个相同兵种、相同星级的单位可以合成升级。',
-      requireAction: true,
-      advanceCondition: () => state.player.metrics.deployCount > 0,
-      position: 'top',
+      description: '招募到的单位出现在这里，拖拽到战场上部署',
+      arrowDir: 'up',
     },
     {
       id: 3,
-      target: '.duel-battlefield',
+      target: '.player-deployment-layer .is-open:first-of-type',
       title: '部署到战场',
-      description: '将单位拖到战场槽位上。不同兵种有不同的攻击范围和伤害模式：刀兵范围攻击、枪兵贯穿伤害、弓兵远程单体。部署位置决定防守效果。',
-      requireAction: true,
-      advanceCondition: () => Object.keys(state.player.troops).length >= 2,
-      position: 'bottom',
+      description: '将单位拖到绿色槽位。刀兵范围攻击、枪兵贯穿、弓兵远程',
+      arrowDir: 'up',
     },
     {
       id: 4,
       target: '.guardian-gate',
       title: '保护貂蝉',
-      description: '敌人会沿路径前进，碰到貂蝉会扣血。HP 归零就输了。你的单位会自动攻击路径上的敌人。击杀敌人获得金币，用于下一轮招募。',
-      requireAction: false,
-      position: 'top',
+      description: '敌人碰到貂蝉会扣血，HP 归零就输了',
+      arrowDir: 'up',
     },
     {
       id: 5,
       target: '.lead-pill',
       title: '与对手竞速',
-      description: '你和对手各自防守，谁先守住全部 8 波谁赢。顶部显示双方 HP 对比和领先状态。合理分配资源、抓住武将时机是取胜关键。准备好了吗？开始你的第一战！',
-      requireAction: false,
-      position: 'bottom',
+      description: '先守住全部波次者获胜。祝你好运！',
+      arrowDir: 'down',
     },
   ]
 }
@@ -87,57 +76,58 @@ export function GameShell({ state, dispatch }: GameShellProps) {
     className: string
   }>()
 
-  // 新手引导状态
-  const [tutorialActive, setTutorialActive] = useState(true)
-  const [tutorialStepIndex, setTutorialStepIndex] = useState(0)
-  const [tutorialDismissed, setTutorialDismissed] = useState(false)
+  const [tutorialStep, setTutorialStep] = useState(0)
+  const [tutorialDone, setTutorialDone] = useState(false)
   const prevPhaseRef = useRef(state.phase)
-  const tutorialSteps = useMemo(() => buildTutorialSteps(state), [state])
-  const currentStep = tutorialSteps[tutorialStepIndex]
+  const tutorialSteps = useMemo(() => buildTutorialSteps(), [])
+  const currentStep = tutorialSteps[tutorialStep]
 
-  // 引导在"开始竞速"后启动，游戏结束后重置
+  // 教程生命周期
   useEffect(() => {
     if (prevPhaseRef.current === 'idle' && state.phase === 'playing') {
-      setTutorialActive(true)
-      setTutorialStepIndex(0)
-      setTutorialDismissed(false)
+      setTutorialStep(0)
+      setTutorialDone(false)
     }
     if (state.phase === 'won' || state.phase === 'lost' || state.phase === 'draw') {
-      setTutorialActive(false)
-      setTutorialDismissed(true)
+      setTutorialDone(true)
     }
     prevPhaseRef.current = state.phase
   }, [state.phase])
 
-  // 自动推进引导步骤
+  // 自动推进
   useEffect(() => {
-    if (!tutorialActive || !currentStep || tutorialDismissed) return
-    if (currentStep.advanceCondition && currentStep.advanceCondition()) {
-      if (tutorialStepIndex < tutorialSteps.length - 1) {
-        const timer = setTimeout(() => setTutorialStepIndex((i) => i + 1), 400)
-        return () => clearTimeout(timer)
-      } else {
-        const timer = setTimeout(() => setTutorialActive(false), 1500)
-        return () => clearTimeout(timer)
-      }
+    if (tutorialDone || !currentStep) return
+    if (tutorialStep === 0 && state.player.reserveItems.length > 0) {
+      const t = setTimeout(() => setTutorialStep(1), 500)
+      return () => clearTimeout(t)
     }
-    // 非强制步骤 2 秒后自动推进
-    if (!currentStep.requireAction && !currentStep.advanceCondition) {
-      const timer = setTimeout(() => {
-        if (tutorialStepIndex < tutorialSteps.length - 1) {
-          setTutorialStepIndex((i) => i + 1)
-        } else {
-          setTutorialActive(false)
-        }
-      }, 3000)
-      return () => clearTimeout(timer)
+    if (tutorialStep === 1 && state.player.metrics.deployCount > 0) {
+      const t = setTimeout(() => setTutorialStep(2), 500)
+      return () => clearTimeout(t)
     }
-  }, [tutorialActive, currentStep, tutorialStepIndex, tutorialSteps.length, tutorialDismissed, state.player.reserveItems, state.player.metrics.deployCount, Object.keys(state.player.troops).length])
+    if (tutorialStep === 2 && Object.keys(state.player.troops).length >= 2) {
+      const t = setTimeout(() => setTutorialStep(3), 500)
+      return () => clearTimeout(t)
+    }
+    if (tutorialStep === 3 && state.player.waveIndex >= 2) {
+      const t = setTimeout(() => setTutorialStep(4), 500)
+      return () => clearTimeout(t)
+    }
+    if (tutorialStep === 4 && state.elapsedSeconds > 5) {
+      const t = setTimeout(() => setTutorialDone(true), 4000)
+      return () => clearTimeout(t)
+    }
+  }, [tutorialDone, currentStep, tutorialStep, state.player.reserveItems.length, state.player.metrics.deployCount, Object.keys(state.player.troops).length, state.player.waveIndex, state.elapsedSeconds])
 
-  const skipTutorial = useCallback(() => {
-    setTutorialActive(false)
-    setTutorialDismissed(true)
-  }, [])
+  const nextTutorial = useCallback(() => {
+    if (tutorialStep < tutorialSteps.length - 1) {
+      setTutorialStep((s) => s + 1)
+    } else {
+      setTutorialDone(true)
+    }
+  }, [tutorialStep, tutorialSteps.length])
+
+  const skipTutorial = useCallback(() => setTutorialDone(true), [])
 
   const units: Record<string, BoardUnit> = useMemo(() => ({ ...state.player.troops, ...state.player.generals }), [state.player.generals, state.player.troops])
 
@@ -157,7 +147,6 @@ export function GameShell({ state, dispatch }: GameShellProps) {
         const config = generalConfig[unit.generalId]
         return { label: config.label, icon: config.icon, className: config.colorClass }
       }
-
       const item = reserveById[payload.itemId]
       if (!item) return undefined
       if (item.type === 'troop') {
@@ -191,7 +180,6 @@ export function GameShell({ state, dispatch }: GameShellProps) {
 
   useEffect(() => {
     if (!drag) return
-
     const getTarget = (x: number, y: number): DropTarget | undefined => {
       const element = document.elementFromPoint(x, y)
       const target = element?.closest<HTMLElement>('[data-drop-kind]')
@@ -204,23 +192,17 @@ export function GameShell({ state, dispatch }: GameShellProps) {
       }
       return undefined
     }
-
     const onPointerMove = (event: PointerEvent) => {
       setDrag((current) => (current ? { ...current, x: event.clientX, y: event.clientY } : current))
     }
-
     const onPointerUp = (event: PointerEvent) => {
       const target = getTarget(event.clientX, event.clientY)
-      if (target) {
-        dispatch({ type: 'drop', payload: drag.payload, target })
-      }
+      if (target) dispatch({ type: 'drop', payload: drag.payload, target })
       setDrag(undefined)
     }
-
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp, { once: true })
     window.addEventListener('pointercancel', onPointerUp, { once: true })
-
     return () => {
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
@@ -293,23 +275,29 @@ export function GameShell({ state, dispatch }: GameShellProps) {
             {drag.label !== drag.icon && <span>{drag.label}</span>}
           </div>
         )}
-        {/* 新手引导遮罩 */}
-        {tutorialActive && currentStep && !tutorialDismissed && (
-          <div className="tutorial-overlay">
-            <div className="tutorial-backdrop" />
-            <div className={`tutorial-tooltip tutorial-${currentStep.position}`}>
-              <div className="tutorial-step-badge">第 {currentStep.id} / {tutorialSteps.length} 步</div>
-              <h3>{currentStep.title}</h3>
-              <p>{currentStep.description}</p>
-              <div className="tutorial-actions">
-                {currentStep.requireAction && (
-                  <span className="tutorial-hint">按提示操作以继续</span>
+        {/* 新手引导 - 底部提示卡片，不遮挡操作区 */}
+        {!tutorialDone && currentStep && (
+          <div className="tutorial-bar">
+            <div className="tutorial-bar-inner">
+              <div className="tutorial-bar-content">
+                <span className="tutorial-bar-step">{currentStep.id}/{tutorialSteps.length}</span>
+                <div className="tutorial-bar-text">
+                  <strong>{currentStep.title}</strong>
+                  <span>{currentStep.description}</span>
+                </div>
+              </div>
+              <div className="tutorial-bar-actions">
+                {currentStep.id < tutorialSteps.length && (
+                  <button className="tutorial-bar-next" type="button" onClick={nextTutorial}>
+                    知道了
+                  </button>
                 )}
-                <button className="tutorial-skip" type="button" onClick={skipTutorial}>
-                  跳过教程
+                <button className="tutorial-bar-skip" type="button" onClick={skipTutorial}>
+                  跳过
                 </button>
               </div>
             </div>
+            <div className={`tutorial-arrow tutorial-arrow-${currentStep.arrowDir}`} />
           </div>
         )}
       </div>
