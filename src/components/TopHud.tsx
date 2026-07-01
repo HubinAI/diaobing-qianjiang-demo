@@ -3,6 +3,7 @@ import type { DuelGameState } from '../types/game'
 
 interface TopHudProps {
   state: DuelGameState
+  leadPillRef?: React.Ref<HTMLDivElement>
 }
 
 function hpPercent(hp: number) {
@@ -16,7 +17,14 @@ function leadStatus(state: DuelGameState) {
   return '势均力敌'
 }
 
-export function TopHud({ state }: TopHudProps) {
+/** 对手段位显示名称 */
+function ghostRankLabel(difficulty: string): string {
+  if (difficulty === 'easy') return '青铜对手'
+  if (difficulty === 'hard') return '黄金对手'
+  return '白银对手'
+}
+
+export function TopHud({ state, leadPillRef }: TopHudProps) {
   const waveTable = state.player.waveTable
   const totalWaves = waveTable.length
   const wave = waveTable[state.player.waveIndex - 1]
@@ -34,7 +42,7 @@ export function TopHud({ state }: TopHudProps) {
         <span className="ghost-avatar" aria-hidden="true">影</span>
         <div>
           <strong data-testid="ghost-name">{state.ghostName}</strong>
-          <small data-testid="ghost-difficulty">{state.ghostDifficulty}</small>
+          <small data-testid="ghost-difficulty">{ghostRankLabel(state.ghostDifficulty)}</small>
         </div>
       </div>
       <div className="hud-time">
@@ -46,7 +54,7 @@ export function TopHud({ state }: TopHudProps) {
         </span>
         {countdown && <span className="wave-alert">{countdown}</span>}
       </div>
-      <div className="lead-pill" data-testid="lead-status" data-value={leadStatus(state)}>
+      <div className="lead-pill" data-testid="lead-status" data-value={leadStatus(state)} ref={leadPillRef}>
         {leadStatus(state)}
       </div>
     </header>

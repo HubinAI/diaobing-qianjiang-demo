@@ -83,8 +83,8 @@ export function getAvailableWeapons(state: GameState): WeaponId[] {
 }
 
 export function buildRecruitCategoryWeights(state: GameState) {
-  const generalAvailable = state.waveIndex >= 4 && getAvailableGenerals(state).length > 0
-  const weaponAvailable = state.waveIndex >= 6 && getAvailableWeapons(state).length > 0
+  const generalAvailable = state.waveIndex >= 2 && getAvailableGenerals(state).length > 0
+  const weaponAvailable = state.waveIndex >= 4 && getAvailableWeapons(state).length > 0
   const weights: Array<{ key: RecruitCategory; weight: number }> = []
 
   if (weaponAvailable) {
@@ -114,13 +114,13 @@ function chooseTroopType(rngState: number) {
 }
 
 export function drawRecruitItem(state: GameState): RecruitResult {
-  const availableGenerals = state.waveIndex >= 4 ? getAvailableGenerals(state) : []
-  const availableWeapons = state.waveIndex >= 6 ? getAvailableWeapons(state) : []
+  const availableGenerals = state.waveIndex >= 2 ? getAvailableGenerals(state) : []
+  const availableWeapons = state.waveIndex >= 4 ? getAvailableWeapons(state) : []
   const generalAvailable = availableGenerals.length > 0
   let rngState = state.recruitRngState ?? state.rngState
   let category: RecruitCategory
 
-  if (state.waveIndex >= 4 && state.recruitsSinceGeneral >= 12 && generalAvailable) {
+  if (state.waveIndex >= 2 && state.recruitsSinceGeneral >= 12 && generalAvailable) {
     category = 'general'
   } else {
     const weights = buildRecruitCategoryWeights(state)

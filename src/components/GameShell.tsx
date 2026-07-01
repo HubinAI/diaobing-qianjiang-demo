@@ -15,55 +15,15 @@ import { TopHud } from './TopHud'
 
 interface TutorialStep {
   id: number
-  target: string
   title: string
   description: string
-  arrowDir: 'up' | 'down'
+  /** 用 ref 直接定位高亮区域，不依赖 CSS selector */
+  highlightRect?: () => DOMRect | null
 }
 
 interface GameShellProps {
   state: DuelGameState
   dispatch: React.Dispatch<GameAction>
-}
-
-function buildTutorialSteps(): TutorialStep[] {
-  return [
-    {
-      id: 1,
-      target: '.recruit-button',
-      title: '招募士兵',
-      description: '点击这里消耗银币招募 6 个单位',
-      arrowDir: 'up',
-    },
-    {
-      id: 2,
-      target: '.reserve-section',
-      title: '预备栏',
-      description: '招募到的单位出现在这里，拖拽到战场上部署',
-      arrowDir: 'up',
-    },
-    {
-      id: 3,
-      target: '.player-deployment-layer .is-open:first-of-type',
-      title: '部署到战场',
-      description: '将单位拖到绿色槽位。刀兵范围攻击、枪兵贯穿、弓兵远程',
-      arrowDir: 'up',
-    },
-    {
-      id: 4,
-      target: '.guardian-gate',
-      title: '保护貂蝉',
-      description: '敌人碰到貂蝉会扣血，HP 归零就输了',
-      arrowDir: 'up',
-    },
-    {
-      id: 5,
-      target: '.lead-pill',
-      title: '与对手竞速',
-      description: '先守住全部波次者获胜。祝你好运！',
-      arrowDir: 'down',
-    },
-  ]
 }
 
 export function GameShell({ state, dispatch }: GameShellProps) {
@@ -76,10 +36,49 @@ export function GameShell({ state, dispatch }: GameShellProps) {
     className: string
   }>()
 
-  const [tutorialStep, setTutorialStep] = useState(0)
+  const [tutorialStep, setTutorialStep] = useState(-1) // -1 = waiting to start
   const [tutorialDone, setTutorialDone] = useState(false)
   const prevPhaseRef = useRef(state.phase)
-  const tutorialSteps = useMemo(() => buildTutorialSteps(), [])
+  const recruitBtnRef = useRef<HTMLButtonElement>(null)
+  const reserveRef = useRef<HTMLDivElement>(null)
+  const battlefieldRef = useRef<HTMLDivElement>(null)
+  const guardianRef = useRef<HTMLDivElement>(null)
+  const leadPillRef = useRef<HTMLDivElement>(null)
+  const phoneFrameRef = useRef<HTMLDivElement>(null)
+
+  const tutorialSteps: TutorialStep[] = useMemo(() => [
+    {
+      id: 1,
+      title: '招募士兵',
+      description: '点击补兵按钮，消耗银币随机获取 6 个单位',
+      highlightRect: () => recruitBtnRef.current?.getBoundingClientRect() ?? null,
+    },
+    {
+      id: 2,
+      title: '预备栏',
+      description: '招募到的单位出现在这里，拖到下方战场槽位部署',
+      highlightRect: () => reserveRef.current?.getBoundingClientRect() ?? null,
+    },
+    {
+      id: 3,
+      title: '部署防线',
+      description: '将单位拖到绿色槽位。刀兵范围攻击、枪兵贯穿、弓兵远程',
+      highlightRect: () => battlefieldRef.current?.getBoundingClientRect() ?? null,
+    },
+    {
+      id: 4,
+      title: '保护貂蝉',
+      description: '敌人沿路径进攻，碰到貂蝉扣血。HP 归零则败',
+      highlightRect: () => guardianRef.current?.getBoundingClientRect() ?? null,
+    },
+    {
+      id: 5,
+      title: '击败对手',
+      description: '比对手先守住全部波次即获胜。祝你好运！',
+      highlightRect: () => leadPillRef.current?.getBoundingClientRect() ?? null,
+    },
+  ], [])
+
   const currentStep = tutorialSteps[tutorialStep]
 
   // 教程生命周期
@@ -96,28 +95,28 @@ export function GameShell({ state, dispatch }: GameShellProps) {
 
   // 自动推进
   useEffect(() => {
-    if (tutorialDone || !currentStep) return
+    if (tutorialDone || tutorialStep < 0) return
     if (tutorialStep === 0 && state.player.reserveItems.length > 0) {
-      const t = setTimeout(() => setTutorialStep(1), 500)
+      const t = setTimeout(() => setTutorialStep(1), 600)
       return () => clearTimeout(t)
     }
     if (tutorialStep === 1 && state.player.metrics.deployCount > 0) {
-      const t = setTimeout(() => setTutorialStep(2), 500)
+      const t = setTimeout(() => setTutorialStep(2), 600)
       return () => clearTimeout(t)
     }
     if (tutorialStep === 2 && Object.keys(state.player.troops).length >= 2) {
-      const t = setTimeout(() => setTutorialStep(3), 500)
+      const t = setTimeout(() => setTutorialStep(3), 600)
       return () => clearTimeout(t)
     }
     if (tutorialStep === 3 && state.player.waveIndex >= 2) {
-      const t = setTimeout(() => setTutorialStep(4), 500)
+      const t = setTimeout(() => setTutorialStep(4), 600)
       return () => clearTimeout(t)
     }
-    if (tutorialStep === 4 && state.elapsedSeconds > 5) {
-      const t = setTimeout(() => setTutorialDone(true), 4000)
+    if (tutorialStep === 4 && state.elapsedSeconds > 8) {
+      const t = setTimeout(() => setTutorialDone(true), 3500)
       return () => clearTimeout(t)
     }
-  }, [tutorialDone, currentStep, tutorialStep, state.player.reserveItems.length, state.player.metrics.deployCount, Object.keys(state.player.troops).length, state.player.waveIndex, state.elapsedSeconds])
+  }, [tutorialDone, tutorialStep, state.player.reserveItems.length, state.player.metrics.deployCount, Object.keys(state.player.troops).length, state.player.waveIndex, state.elapsedSeconds])
 
   const nextTutorial = useCallback(() => {
     if (tutorialStep < tutorialSteps.length - 1) {
@@ -128,6 +127,50 @@ export function GameShell({ state, dispatch }: GameShellProps) {
   }, [tutorialStep, tutorialSteps.length])
 
   const skipTutorial = useCallback(() => setTutorialDone(true), [])
+
+  // 计算高亮框相对于 phone-frame 的位置
+  const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties>({ display: 'none' })
+  const [arrowStyle, setArrowStyle] = useState<React.CSSProperties>({ display: 'none' })
+  const rafRef = useRef<number>()
+
+  useEffect(() => {
+    if (tutorialDone || !currentStep?.highlightRect || !phoneFrameRef.current) {
+      setHighlightStyle({ display: 'none' })
+      setArrowStyle({ display: 'none' })
+      return
+    }
+    const update = () => {
+      const rect = currentStep.highlightRect!()
+      const frameRect = phoneFrameRef.current!.getBoundingClientRect()
+      if (!rect || rect.width === 0) {
+        setHighlightStyle({ display: 'none' })
+        setArrowStyle({ display: 'none' })
+        return
+      }
+      setHighlightStyle({
+        display: 'block',
+        left: rect.left - frameRect.left - 3,
+        top: rect.top - frameRect.top - 3,
+        width: rect.width + 6,
+        height: rect.height + 6,
+      })
+      // 箭头指向高亮框顶部中央
+      setArrowStyle({
+        display: 'block',
+        left: rect.left - frameRect.left + rect.width / 2,
+        top: rect.top - frameRect.top - 8,
+      })
+    }
+    update()
+    const onFrame = () => {
+      update()
+      rafRef.current = requestAnimationFrame(onFrame)
+    }
+    rafRef.current = requestAnimationFrame(onFrame)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [tutorialDone, currentStep, state.phase])
 
   const units: Record<string, BoardUnit> = useMemo(() => ({ ...state.player.troops, ...state.player.generals }), [state.player.generals, state.player.troops])
 
@@ -212,24 +255,30 @@ export function GameShell({ state, dispatch }: GameShellProps) {
 
   return (
     <div className="game-page" data-testid="game-root">
-      <div className="phone-frame">
-        <TopHud state={state} />
-        <Battlefield
-          state={state}
-          isDragging={Boolean(drag)}
-          onDragStart={handleDragStart}
-          onSlotClick={(sideId: SideId, slotId) => dispatch({ type: 'selectSlot', sideId, slotId })}
-          onClearSelection={() => dispatch({ type: 'clearSelection' })}
-        />
-        <GuardianGate state={state} />
-        <ReserveBar
-          items={state.player.reserveItems}
-          onDragStart={handleDragStart}
-          onShovelClick={(itemId) => dispatch({ type: 'selectReserveShovel', itemId })}
-        />
+      <div className="phone-frame" ref={phoneFrameRef}>
+        <TopHud state={state} leadPillRef={leadPillRef} />
+        <div ref={battlefieldRef}>
+          <Battlefield
+            state={state}
+            isDragging={Boolean(drag)}
+            onDragStart={handleDragStart}
+            onSlotClick={(sideId: SideId, slotId) => dispatch({ type: 'selectSlot', sideId, slotId })}
+            onClearSelection={() => dispatch({ type: 'clearSelection' })}
+          />
+        </div>
+        <div ref={guardianRef}>
+          <GuardianGate state={state} />
+        </div>
+        <div ref={reserveRef}>
+          <ReserveBar
+            items={state.player.reserveItems}
+            onDragStart={handleDragStart}
+            onShovelClick={(itemId) => dispatch({ type: 'selectReserveShovel', itemId })}
+          />
+        </div>
         <footer className="bottom-actions">
           <ShovelStatus state={state.player} onSelect={() => dispatch({ type: 'selectAutoShovel' })} />
-          <RecruitButton state={state.player} onRecruit={() => dispatch({ type: 'recruit' })} />
+          <RecruitButton state={state.player} onRecruit={() => dispatch({ type: 'recruit' })} ref={recruitBtnRef} />
           <button className="compendium-button" type="button" onClick={() => dispatch({ type: 'toggleCompendium' })}>
             图鉴
           </button>
@@ -275,7 +324,11 @@ export function GameShell({ state, dispatch }: GameShellProps) {
             {drag.label !== drag.icon && <span>{drag.label}</span>}
           </div>
         )}
-        {/* 新手引导 - 底部提示卡片，不遮挡操作区 */}
+        {/* 脉冲高亮框 */}
+        <div className="tutorial-highlight" style={highlightStyle} />
+        {/* 指向箭头 */}
+        <div className="tutorial-pointer" style={arrowStyle} />
+        {/* 底部提示卡片 */}
         {!tutorialDone && currentStep && (
           <div className="tutorial-bar">
             <div className="tutorial-bar-inner">
@@ -297,7 +350,6 @@ export function GameShell({ state, dispatch }: GameShellProps) {
                 </button>
               </div>
             </div>
-            <div className={`tutorial-arrow tutorial-arrow-${currentStep.arrowDir}`} />
           </div>
         )}
       </div>

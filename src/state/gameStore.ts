@@ -1,6 +1,6 @@
 import { duelConfig, enemyConfig, gameConfig, generalConfig, getRecruitCost, troopConfig, weaponConfig } from '../config/gameConfig'
 import { tickCombat } from '../game/combat'
-import { createInitialGameState, laneFromSlot } from '../game/engine'
+import { createInitialGameState, hashSeed, laneFromSlot } from '../game/engine'
 import { canMergeTroops, nextStar } from '../game/merge'
 import { pathIdFor } from '../game/paths'
 import { drawRecruitBatch } from '../game/randomPool'
@@ -791,9 +791,17 @@ export function sideReducer(state: GameState, action: SideAction): GameState {
 
 export function createInitialDuelState(seed = 'duel-seed-001', phase: DuelGameState['phase'] = 'idle'): DuelGameState {
   const player = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'player')
-  // ghost 必须和 player 使用相同的波次表，保证公平对战
   const ghostBase = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'ghost')
   const ghost = { ...ghostBase, waveTable: player.waveTable }
+
+  // 随机对手难度
+  const difficulties: Array<'easy' | 'normal' | 'hard'> = ['easy', 'normal', 'hard']
+  const diffIndex = Math.abs(hashSeed(seed + '-ghost')) % difficulties.length
+  const ghostDifficulty = difficulties[diffIndex]
+
+  const rankNames: Record<string, string> = { easy: '青铜对手', normal: '白银对手', hard: '黄金对手' }
+  const ghostFileIds: Record<string, string> = { easy: 'easy-001', normal: 'normal-001', hard: 'hard-001' }
+
   return {
     phase,
     seed,
@@ -806,17 +814,17 @@ export function createInitialDuelState(seed = 'duel-seed-001', phase: DuelGameSt
     selectedShovel: undefined,
     toastUntil: 0,
     ghostReplay: {
-      fileId: 'normal-001',
-      difficulty: 'normal',
+      fileId: ghostFileIds[ghostDifficulty],
+      difficulty: ghostDifficulty,
       nextActionIndex: 0,
       failedActionCount: 0,
       failures: [],
       completed: false,
     },
-    ghostId: 'ghost-normal-001',
-    ghostName: '演武对手',
+    ghostId: `ghost-${ghostFileIds[ghostDifficulty]}`,
+    ghostName: rankNames[ghostDifficulty],
     ghostAvatarId: 'avatar_03',
-    ghostDifficulty: 'normal',
+    ghostDifficulty,
     showCompendium: false,
     showDebug: false,
     showEnemyHp: false,

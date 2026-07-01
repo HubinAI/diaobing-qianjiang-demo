@@ -2202,8 +2202,46 @@ button {
 }
 
 /* ============================================================
-   新手引导样式 - 底部提示条，不遮挡操作区
+   新手引导样式 - 脉冲高亮框 + 底部提示条
    ============================================================ */
+
+/* 脉冲高亮边框 - 定位在目标元素上 */
+.tutorial-highlight {
+  position: absolute;
+  z-index: 490;
+  pointer-events: none;
+  border: 2.5px solid #f6d27b;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(246,210,123,0.5), inset 0 0 8px rgba(246,210,123,0.1);
+  animation: highlight-pulse 1s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(246,210,123,0.5), inset 0 0 8px rgba(246,210,123,0.1); }
+  50% { box-shadow: 0 0 28px rgba(246,210,123,0.8), inset 0 0 14px rgba(246,210,123,0.2); }
+}
+
+/* 向下箭头指针 */
+.tutorial-pointer {
+  position: absolute;
+  z-index: 491;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #f6d27b;
+  transform: translateX(-50%);
+  animation: pointer-bounce 0.7s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+@keyframes pointer-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(5px); }
+}
+
+/* 底部提示条 */
 .tutorial-bar {
   position: absolute;
   bottom: 0;
@@ -2314,29 +2352,6 @@ button {
 .tutorial-bar-skip:hover {
   border-color: rgba(255,255,255,0.35);
   color: #aaa;
-}
-
-/* 指向箭头 */
-.tutorial-arrow {
-  width: 0;
-  height: 0;
-  margin: 0 auto;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  animation: tutorial-arrow-bounce 0.8s ease-in-out infinite;
-}
-
-.tutorial-arrow-up {
-  border-bottom: 8px solid #f6d27b;
-}
-
-.tutorial-arrow-down {
-  border-top: 8px solid #f6d27b;
-}
-
-@keyframes tutorial-arrow-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
 }
 
 /* 开始界面引导文案 */
