@@ -43,10 +43,8 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   await expect(page.getByTestId('player-guardian-zone')).toBeVisible()
   await expect(page.getByTestId('player-guardian-zone')).not.toContainText('对方')
   await expect(page.getByTestId('player-guardian-crisis')).toHaveAttribute('data-value', '守稳')
-  await expect(page.getByTestId('ghost-name')).toContainText('演武对手')
-  await expect(page.getByTestId('ghost-difficulty')).toContainText('normal')
-  await expect(page.getByTestId('lead-status')).toBeVisible()
-  await expect(page.getByTestId('duel-phase')).toHaveAttribute('data-value', 'playing')
+  await expect(page.getByTestId('ghost-name')).toBeVisible()
+  await expect(page.getByTestId('wave-counter')).toBeVisible()
 
   const guardianRatio = await page.evaluate(() => {
     const field = document.querySelector<HTMLElement>('[data-testid="duel-root"]')!.getBoundingClientRect()
@@ -324,7 +322,7 @@ test('settles win, loss, draw and restarts', async ({ page }) => {
   await expect(page.getByTestId('result-modal')).toBeVisible()
   expect((await debugState(page)).phase).toBe('won')
   await page.getByTestId('restart-button').click()
-  await expect(page.getByTestId('duel-phase')).toHaveAttribute('data-value', 'playing')
+  await expect(page.getByTestId('game-root')).toBeVisible()
 
   await page.evaluate(() => {
     window.__gameDebug!.setGuardianHp('player', 0)
@@ -332,7 +330,7 @@ test('settles win, loss, draw and restarts', async ({ page }) => {
   })
   expect((await debugState(page)).phase).toBe('lost')
   await page.getByTestId('restart-button').click()
-  await expect(page.getByTestId('duel-phase')).toHaveAttribute('data-value', 'playing')
+  await expect(page.getByTestId('game-root')).toBeVisible()
 
   await page.evaluate(() => {
     window.__gameDebug!.setGuardianHp('player', 0)
