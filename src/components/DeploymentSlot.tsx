@@ -45,6 +45,7 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
       data-side-id={slot.sideId}
       data-slot-zone={slot.zone}
       data-slot-status={slot.unlocked ? 'active' : 'locked'}
+      data-adjacent-road-id={slot.adjacentRoadId}
       data-slot-x={slot.x}
       data-slot-y={slot.y}
       data-facing-angle-deg={slot.facingAngleDeg}

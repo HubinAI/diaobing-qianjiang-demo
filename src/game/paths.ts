@@ -13,25 +13,63 @@ export interface EnemyPath {
   points: NormalizedPoint[]
 }
 
+export interface RoadSegment {
+  start: NormalizedPoint
+  end: NormalizedPoint
+}
+
+export interface RoadLayout {
+  horizontal: RoadSegment
+  turn: NormalizedPoint[]
+  vertical: RoadSegment
+}
+
+function mirrorPathHorizontally(points: NormalizedPoint[]): NormalizedPoint[] {
+  return points.map((point) => ({ x: 1 - point.x, y: point.y }))
+}
+
+function mirrorSegmentHorizontally(segment: RoadSegment): RoadSegment {
+  return {
+    start: { x: 1 - segment.start.x, y: segment.start.y },
+    end: { x: 1 - segment.end.x, y: segment.end.y },
+  }
+}
+
+const leftPlayerRoadLayout: RoadLayout = {
+  horizontal: {
+    start: { x: 0, y: 0.55 },
+    end: { x: 0.32, y: 0.55 },
+  },
+  turn: [
+    { x: 0.36, y: 0.56 },
+    { x: 0.405, y: 0.595 },
+    { x: 0.42, y: 0.65 },
+  ],
+  vertical: {
+    start: { x: 0.42, y: 0.65 },
+    end: { x: 0.42, y: 0.98 },
+  },
+}
+
+const leftPlayerPathPoints: NormalizedPoint[] = [
+  leftPlayerRoadLayout.horizontal.start,
+  leftPlayerRoadLayout.horizontal.end,
+  ...leftPlayerRoadLayout.turn,
+  leftPlayerRoadLayout.vertical.end,
+]
+
+export const playerRoadLayouts: Record<EntrySide, RoadLayout> = {
+  left: leftPlayerRoadLayout,
+  right: {
+    horizontal: mirrorSegmentHorizontally(leftPlayerRoadLayout.horizontal),
+    turn: mirrorPathHorizontally(leftPlayerRoadLayout.turn),
+    vertical: mirrorSegmentHorizontally(leftPlayerRoadLayout.vertical),
+  },
+}
+
 export const playerPathPoints: Record<EntrySide, NormalizedPoint[]> = {
-  left: [
-    { x: 0, y: 0.5 },
-    { x: 0.18, y: 0.5 },
-    { x: 0.34, y: 0.54 },
-    { x: 0.42, y: 0.62 },
-    { x: 0.42, y: 0.8 },
-    { x: 0.46, y: 0.92 },
-    { x: 0.5, y: 0.98 },
-  ],
-  right: [
-    { x: 1, y: 0.5 },
-    { x: 0.82, y: 0.5 },
-    { x: 0.66, y: 0.54 },
-    { x: 0.58, y: 0.62 },
-    { x: 0.58, y: 0.8 },
-    { x: 0.54, y: 0.92 },
-    { x: 0.5, y: 0.98 },
-  ],
+  left: leftPlayerPathPoints,
+  right: mirrorPathHorizontally(leftPlayerPathPoints),
 }
 
 export function mirrorPathVertically(points: NormalizedPoint[]): NormalizedPoint[] {

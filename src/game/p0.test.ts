@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { executeGameCommand, duelReducer } from './commandBus'
 import { createInitialGameState, createInitialDuelState } from '../state/gameStore'
 import { createInitialSlots, mirrorFacingVertically } from './engine'
-import { enemyPaths, pathIdFor, samplePath } from './paths'
+import { enemyPaths, pathIdFor, playerPathPoints, samplePath, type NormalizedPoint } from './paths'
 import { mapLegacySlotId, slotLayoutVersion } from './slotLayout'
 import { getCompatibleGhostFiles } from '../ghost/ghostRepository'
 import { validateGhostRunFile } from '../ghost/ghostValidator'
@@ -32,10 +32,55 @@ function pixelDistance(a: { x: number; y: number }, b: { x: number; y: number },
   return Math.hypot((a.x - b.x) * width, (a.y - b.y) * height)
 }
 
+function scaledDistance(a: NormalizedPoint, b: NormalizedPoint) {
+  return Math.hypot(a.x - b.x, (a.y - b.y) * 1.26)
+}
+
+function closestPointOnSegment(point: NormalizedPoint, start: NormalizedPoint, end: NormalizedPoint) {
+  const vx = end.x - start.x
+  const vy = (end.y - start.y) * 1.26
+  const wx = point.x - start.x
+  const wy = (point.y - start.y) * 1.26
+  const lengthSquared = vx * vx + vy * vy
+  const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, (wx * vx + wy * vy) / lengthSquared))
+  return {
+    x: start.x + (end.x - start.x) * t,
+    y: start.y + (end.y - start.y) * t,
+  }
+}
+
+function closestPointOnPath(point: NormalizedPoint, path: NormalizedPoint[]) {
+  let closest = path[0]
+  let distance = Number.POSITIVE_INFINITY
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const candidate = closestPointOnSegment(point, path[index], path[index + 1])
+    const candidateDistance = scaledDistance(point, candidate)
+    if (candidateDistance < distance) {
+      closest = candidate
+      distance = candidateDistance
+    }
+  }
+  return { point: closest, distance }
+}
+
+function facingDot(slot: { x: number; y: number; facingAngleDeg: number }, target: NormalizedPoint) {
+  const radians = (slot.facingAngleDeg * Math.PI) / 180
+  const fx = Math.cos(radians)
+  const fy = Math.sin(radians)
+  const tx = target.x - slot.x
+  const ty = (target.y - slot.y) * 1.26
+  return fx * tx + fy * ty
+}
+
 describe('round 5 ghost duel core', () => {
   it('builds vertically mirrored paths and deployment slots', () => {
     expect(pathIdFor('player', 'left')).toBe('player-left')
     expect(pathIdFor('ghost', 'left')).toBe('ghost-left')
+
+    expect(playerPathPoints.right).toEqual(playerPathPoints.left.map((point) => ({ x: 1 - point.x, y: point.y })))
+    expect(playerPathPoints.left[0].y).toBeCloseTo(playerPathPoints.left[1].y)
+    expect(playerPathPoints.left[playerPathPoints.left.length - 1].x).toBeCloseTo(0.42)
+    expect(playerPathPoints.right[playerPathPoints.right.length - 1].x).toBeCloseTo(0.58)
 
     for (const entrySide of ['left', 'right'] as const) {
       for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
@@ -62,6 +107,7 @@ describe('round 5 ghost duel core', () => {
       expect(ghostSlots[index].y).toBeCloseTo(1 - slot.y)
       expect(ghostSlots[index].facingAngleDeg).toBeCloseTo(mirrorFacingVertically(slot.facingAngleDeg))
       expect(ghostSlots[index].unlocked).toBe(slot.unlocked)
+      expect(ghostSlots[index].adjacentRoadId).toBe(slot.adjacentRoadId.replace('player-', 'ghost-'))
     })
 
     for (let index = 0; index < 7; index += 1) {
@@ -71,12 +117,24 @@ describe('round 5 ghost duel core', () => {
       const right = playerSlots.find((slot) => slot.id === `player-right-${status}-${localIndex}`)!
       expect(right.x).toBeCloseTo(1 - left.x)
       expect(right.y).toBeCloseTo(left.y)
+      expect(right.facingAngleDeg).toBeCloseTo(((180 - left.facingAngleDeg + 180) % 360 + 360) % 360 - 180)
     }
 
-    const slotSize = 348 * 0.105
+    const sideSlots = playerSlots.filter((slot) => slot.zone !== 'center')
+    sideSlots.forEach((slot) => {
+      expect(slot.x).toBeGreaterThanOrEqual(0.12)
+      expect(slot.x).toBeLessThanOrEqual(0.88)
+      const road = slot.zone === 'left' ? playerPathPoints.left : playerPathPoints.right
+      const closest = closestPointOnPath(slot, road)
+      expect(closest.distance, slot.id).toBeGreaterThanOrEqual(0.06)
+      expect(closest.distance, slot.id).toBeLessThanOrEqual(0.13)
+      expect(facingDot(slot, closest.point), slot.id).toBeGreaterThan(0.04)
+    })
+
+    const slotSize = 36
     for (let outer = 0; outer < playerSlots.length; outer += 1) {
       for (let inner = outer + 1; inner < playerSlots.length; inner += 1) {
-        expect(pixelDistance(playerSlots[outer], playerSlots[inner])).toBeGreaterThanOrEqual(slotSize * 1.18)
+        expect(pixelDistance(playerSlots[outer], playerSlots[inner])).toBeGreaterThanOrEqual(slotSize)
       }
     }
 

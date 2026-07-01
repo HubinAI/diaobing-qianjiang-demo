@@ -1,29 +1,130 @@
 import { gameConfig, getRecruitCost } from '../config/gameConfig'
+import { playerRoadLayouts, type NormalizedPoint } from './paths'
 import type { DeploymentSlot, GameState, LaneId, RunMetrics, SideId } from '../types/game'
 
-export type BaseDeploymentSlot = Omit<DeploymentSlot, 'id' | 'sideId' | 'occupantId'>
+export type BaseDeploymentSlot = Omit<DeploymentSlot, 'id' | 'sideId' | 'occupantId' | 'adjacentRoadId'>
 
-type SlotTemplate = BaseDeploymentSlot & { baseId: string }
-
-const leftSlotPlan: SlotTemplate[] = [
-  { baseId: 'left-active-0', zone: 'left', lane: 'left', unlocked: true, index: 0, x: 0.06, y: 0.56, facingAngleDeg: 10 },
-  { baseId: 'left-active-1', zone: 'left', lane: 'left', unlocked: true, index: 1, x: 0.15, y: 0.64, facingAngleDeg: 4 },
-  { baseId: 'left-active-2', zone: 'left', lane: 'left', unlocked: true, index: 2, x: 0.24, y: 0.56, facingAngleDeg: 12 },
-  { baseId: 'left-active-3', zone: 'left', lane: 'left', unlocked: true, index: 3, x: 0.33, y: 0.64, facingAngleDeg: 4 },
-  { baseId: 'left-active-4', zone: 'left', lane: 'left', unlocked: true, index: 4, x: 0.06, y: 0.73, facingAngleDeg: -2 },
-  { baseId: 'left-locked-0', zone: 'left', lane: 'left', unlocked: false, index: 5, x: 0.1, y: 0.84, facingAngleDeg: -4 },
-  { baseId: 'left-locked-1', zone: 'left', lane: 'left', unlocked: false, index: 6, x: 0.12, y: 0.96, facingAngleDeg: -8 },
-]
-
-const centerSlotPlan: SlotTemplate[] = [
-  { baseId: 'center-active-0', zone: 'center', lane: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.7, facingAngleDeg: -90 },
-  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.84, facingAngleDeg: -90 },
-]
+type RoadKey = 'left' | 'right' | 'merge'
+type SlotTemplate = BaseDeploymentSlot & { baseId: string; adjacentRoadKey: RoadKey }
+type SlotAnchor = Omit<SlotTemplate, 'x' | 'y' | 'facingAngleDeg'> & {
+  roadPoint: NormalizedPoint
+  offset: NormalizedPoint
+  targetPoint?: NormalizedPoint
+}
 
 function normalizeAngle(angleDeg: number) {
   const normalized = ((angleDeg + 180) % 360 + 360) % 360 - 180
   return Object.is(normalized, -0) ? 0 : normalized
 }
+
+function angleToPoint(from: NormalizedPoint, target: NormalizedPoint) {
+  const dy = (target.y - from.y) * gameConfig.battlefieldHeightToWidthRatio
+  const dx = target.x - from.x
+  return normalizeAngle((Math.atan2(dy, dx) * 180) / Math.PI)
+}
+
+function slotFromRoad(anchor: SlotAnchor): SlotTemplate {
+  const point = {
+    x: anchor.roadPoint.x + anchor.offset.x,
+    y: anchor.roadPoint.y + anchor.offset.y,
+  }
+  return {
+    baseId: anchor.baseId,
+    zone: anchor.zone,
+    lane: anchor.lane,
+    adjacentRoadKey: anchor.adjacentRoadKey,
+    unlocked: anchor.unlocked,
+    index: anchor.index,
+    x: point.x,
+    y: point.y,
+    facingAngleDeg: angleToPoint(point, anchor.targetPoint ?? anchor.roadPoint),
+  }
+}
+
+const leftRoad = playerRoadLayouts.left
+
+const leftSlotAnchors: SlotAnchor[] = [
+  {
+    baseId: 'left-active-0',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 0,
+    roadPoint: { x: 0.13, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.08 },
+  },
+  {
+    baseId: 'left-active-1',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 1,
+    roadPoint: { x: 0.24, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.08 },
+  },
+  {
+    baseId: 'left-active-2',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 2,
+    roadPoint: { x: 0.35, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.087 },
+    targetPoint: leftRoad.turn[1],
+  },
+  {
+    baseId: 'left-active-3',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 3,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.735 },
+    offset: { x: -0.13, y: 0 },
+  },
+  {
+    baseId: 'left-active-4',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: true,
+    index: 4,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.825 },
+    offset: { x: -0.062, y: 0 },
+  },
+  {
+    baseId: 'left-locked-0',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: false,
+    index: 5,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.915 },
+    offset: { x: -0.13, y: 0 },
+  },
+  {
+    baseId: 'left-locked-1',
+    zone: 'left',
+    lane: 'left',
+    adjacentRoadKey: 'left',
+    unlocked: false,
+    index: 6,
+    roadPoint: { x: leftRoad.vertical.end.x, y: leftRoad.vertical.end.y },
+    offset: { x: -0.058, y: 0.02 },
+  },
+]
+
+const leftSlotPlan: SlotTemplate[] = [
+  ...leftSlotAnchors.map(slotFromRoad),
+]
+
+const centerSlotPlan: SlotTemplate[] = [
+  { baseId: 'center-active-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.76, facingAngleDeg: -90 },
+  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.89, facingAngleDeg: -90 },
+]
 
 function mirrorSlotHorizontally(slot: SlotTemplate): SlotTemplate {
   return {
@@ -31,6 +132,7 @@ function mirrorSlotHorizontally(slot: SlotTemplate): SlotTemplate {
     baseId: slot.baseId.replace('left-', 'right-'),
     zone: 'right',
     lane: 'right',
+    adjacentRoadKey: slot.adjacentRoadKey === 'left' ? 'right' : slot.adjacentRoadKey,
     x: 1 - slot.x,
     facingAngleDeg: normalizeAngle(180 - slot.facingAngleDeg),
   }
@@ -53,6 +155,7 @@ export function createInitialSlots(sideId: SideId = 'player'): DeploymentSlot[] 
       sideId,
       zone: slot.zone,
       lane: slot.lane,
+      adjacentRoadId: `${sideId}-${slot.adjacentRoadKey}`,
       unlocked: slot.unlocked,
       index: slot.index,
       x: slot.x,

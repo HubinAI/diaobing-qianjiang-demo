@@ -47,7 +47,7 @@ describe('AttackGeometry target selection', () => {
   it('uses spear strip direction, side exclusion, max target count, and near-to-far order', () => {
     const geometry: AttackGeometry = {
       shape: 'strip',
-      origin: { x: 0.08, y: 0.5 },
+      origin: { x: 0.08, y: 0.55 },
       facingAngleDeg: 0,
       lengthRatio: attackShapeConfig.spear.lengthRatio,
       widthRatio: attackShapeConfig.spear.widthRatio,

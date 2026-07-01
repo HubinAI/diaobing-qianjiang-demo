@@ -24,7 +24,7 @@ function enemy(id: string, progress: number): EnemyUnit {
 
 function spearState(): GameState {
   const state = createInitialGameState('spear-trace', 'playing', 'player')
-  const slot = { ...state.slots[0], id: 'test-spear-slot', x: 0.08, y: 0.5, facingAngleDeg: 0, occupantId: 'test-spear' }
+  const slot = { ...state.slots[0], id: 'test-spear-slot', x: 0.08, y: 0.55, facingAngleDeg: 0, occupantId: 'test-spear' }
   return {
     ...state,
     elapsedSeconds: 1,

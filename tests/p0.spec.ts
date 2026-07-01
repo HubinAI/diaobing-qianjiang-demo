@@ -62,6 +62,19 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     const ghost = state.ghost.slots[index]
     expect(ghost.x).toBeCloseTo(slot.x)
     expect(ghost.y).toBeCloseTo(1 - slot.y)
+    expect(ghost.adjacentRoadId).toBe(slot.adjacentRoadId.replace('player-', 'ghost-'))
+  })
+
+  const playerPathPoints = await page.evaluate(() => {
+    const left = document.querySelector('[data-testid="path-player-left"]')?.getAttribute('points') ?? ''
+    const right = document.querySelector('[data-testid="path-player-right"]')?.getAttribute('points') ?? ''
+    return { left, right }
+  })
+  const leftPath = playerPathPoints.left.split(' ').map((pair) => pair.split(',').map(Number))
+  const rightPath = playerPathPoints.right.split(' ').map((pair) => pair.split(',').map(Number))
+  rightPath.forEach(([x, y], index) => {
+    expect(x).toBeCloseTo(100 - leftPath[index][0])
+    expect(y).toBeCloseTo(leftPath[index][1])
   })
 
   const minGap = await page.evaluate(() => {
@@ -85,6 +98,63 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     return { gap, pair }
   })
   expect(minGap.gap, minGap.pair).toBeGreaterThanOrEqual(0)
+
+  const layoutRelation = await page.evaluate(() => {
+    const field = document.querySelector<HTMLElement>('[data-testid="duel-root"]')!.getBoundingClientRect()
+    const slots = [...document.querySelectorAll<HTMLElement>('[data-side-id="player"]')]
+      .map((element) => {
+        const rect = element.getBoundingClientRect()
+        return {
+          id: element.dataset.slotId!,
+          zone: element.dataset.slotZone!,
+          x: Number(element.dataset.slotX),
+          y: Number(element.dataset.slotY),
+          facingAngleDeg: Number(element.dataset.facingAngleDeg),
+          leftEdge: rect.left - field.left,
+          rightEdge: field.right - rect.right,
+        }
+      })
+      .filter((slot) => slot.zone !== 'center')
+    const paths = {
+      left: (document.querySelector('[data-testid="path-player-left"]')?.getAttribute('points') ?? '').split(' ').map((pair) => {
+        const [x, y] = pair.split(',').map(Number)
+        return { x: x / 100, y: y / 100 }
+      }),
+      right: (document.querySelector('[data-testid="path-player-right"]')?.getAttribute('points') ?? '').split(' ').map((pair) => {
+        const [x, y] = pair.split(',').map(Number)
+        return { x: x / 100, y: y / 100 }
+      }),
+    }
+    function closest(point: { x: number; y: number }, path: Array<{ x: number; y: number }>) {
+      let best = { x: path[0].x, y: path[0].y, distance: Number.POSITIVE_INFINITY }
+      for (let index = 0; index < path.length - 1; index += 1) {
+        const start = path[index]
+        const end = path[index + 1]
+        const vx = end.x - start.x
+        const vy = (end.y - start.y) * 1.26
+        const wx = point.x - start.x
+        const wy = (point.y - start.y) * 1.26
+        const t = Math.max(0, Math.min(1, (wx * vx + wy * vy) / Math.max(0.000001, vx * vx + vy * vy)))
+        const candidate = { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t }
+        const distance = Math.hypot(point.x - candidate.x, (point.y - candidate.y) * 1.26)
+        if (distance < best.distance) best = { ...candidate, distance }
+      }
+      return best
+    }
+    return slots.map((slot) => {
+      const path = slot.zone === 'left' ? paths.left : paths.right
+      const road = closest(slot, path)
+      const radians = (slot.facingAngleDeg * Math.PI) / 180
+      const facingDot = Math.cos(radians) * (road.x - slot.x) + Math.sin(radians) * ((road.y - slot.y) * 1.26)
+      return { id: slot.id, leftEdge: slot.leftEdge, rightEdge: slot.rightEdge, roadDistance: road.distance, facingDot }
+    })
+  })
+  layoutRelation.forEach((slot) => {
+    expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(24)
+    expect(slot.roadDistance, slot.id).toBeGreaterThanOrEqual(0.06)
+    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(0.13)
+    expect(slot.facingDot, slot.id).toBeGreaterThan(0.04)
+  })
 })
 
 test('shows opponent Diaochan live HP in the former time slot', async ({ page }) => {
@@ -156,6 +226,22 @@ test('spawns four mirrored enemy paths from left and right sides', async ({ page
   expect(playerLeft.pathId).toBe('player-left')
   expect(ghostLeft.pathId).toBe('ghost-left')
 
+  const enemyOnRoadCenter = await page.locator('[data-target-side="player"][data-entry-side="left"]').first().evaluate((element) => {
+    const progress = Number(element.getAttribute('data-progress'))
+    const [first, second] = (document.querySelector('[data-testid="path-player-left"]')?.getAttribute('points') ?? '')
+      .split(' ')
+      .slice(0, 2)
+      .map((pair) => pair.split(',').map(Number))
+    return {
+      x: Number(element.getAttribute('data-x')),
+      y: Number(element.getAttribute('data-y')),
+      expectedX: (first[0] + (second[0] - first[0]) * progress * 5) / 100,
+      expectedY: (first[1] + (second[1] - first[1]) * progress * 5) / 100,
+    }
+  })
+  expect(enemyOnRoadCenter.x).toBeCloseTo(enemyOnRoadCenter.expectedX)
+  expect(enemyOnRoadCenter.y).toBeCloseTo(enemyOnRoadCenter.expectedY)
+
   await page.evaluate(() => {
     window.__gameDebug!.setGameSpeed(1)
     window.__gameDebug!.advanceTime(4)
@@ -171,12 +257,12 @@ test('renders spear thrust visuals from the shared attack geometry', async ({ pa
   await page.evaluate(() => {
     window.__gameDebug!.setReserveItems([{ id: 'visual-spear', type: 'troop', troopType: 'spear', star: 1 }])
   })
-  await page.getByTestId('recruit-slot-0').locator('.reserve-item').dragTo(page.getByTestId('player-left-active-2'))
+  await page.getByTestId('recruit-slot-0').locator('.reserve-item').dragTo(page.getByTestId('player-left-active-3'))
   await page.evaluate(() => {
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.36)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.4)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.44)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.48)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.834)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.84)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.846)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.852)
     window.__gameDebug!.advanceTime(0.05)
   })
 

@@ -123,6 +123,7 @@ export interface DeploymentSlot {
   sideId: SideId
   zone: 'left' | 'right' | 'center'
   lane: SlotLane
+  adjacentRoadId: string
   unlocked: boolean
   index: number
   x: number
