@@ -1,3 +1,4 @@
+import { gameConfig } from '../config/gameConfig'
 import type { EnemyPathId, EntrySide, SideId } from '../types/game'
 
 export type NormalizedPoint = {
@@ -24,6 +25,28 @@ export interface RoadLayout {
   vertical: RoadSegment
 }
 
+export interface RoadClearanceConfig {
+  roadVisualHalfWidth: number
+  maxEnemyRadius: number
+  unitVisualOverflow: number
+  safetyGap: number
+  cornerExtraClearance: number
+  minimumRatio: number
+  cornerMinimumRatio: number
+  cornerInfluenceRatio: number
+}
+
+export const roadClearanceConfig: RoadClearanceConfig = {
+  roadVisualHalfWidth: 16,
+  maxEnemyRadius: 17,
+  unitVisualOverflow: 6,
+  safetyGap: 5,
+  cornerExtraClearance: 5,
+  minimumRatio: 0.105,
+  cornerMinimumRatio: 0.118,
+  cornerInfluenceRatio: 0.18,
+}
+
 function mirrorPathHorizontally(points: NormalizedPoint[]): NormalizedPoint[] {
   return points.map((point) => ({ x: 1 - point.x, y: point.y }))
 }
@@ -37,17 +60,17 @@ function mirrorSegmentHorizontally(segment: RoadSegment): RoadSegment {
 
 const leftPlayerRoadLayout: RoadLayout = {
   horizontal: {
-    start: { x: 0, y: 0.55 },
-    end: { x: 0.32, y: 0.55 },
+    start: { x: 0, y: 0.53 },
+    end: { x: 0.27, y: 0.53 },
   },
   turn: [
-    { x: 0.36, y: 0.56 },
-    { x: 0.405, y: 0.595 },
-    { x: 0.42, y: 0.65 },
+    { x: 0.32, y: 0.55 },
+    { x: 0.37, y: 0.6 },
+    { x: 0.39, y: 0.66 },
   ],
   vertical: {
-    start: { x: 0.42, y: 0.65 },
-    end: { x: 0.42, y: 0.98 },
+    start: { x: 0.39, y: 0.66 },
+    end: { x: 0.39, y: 0.98 },
   },
 }
 
@@ -131,6 +154,49 @@ export function samplePathPercent(pathId: EnemyPathId, progress: number): Normal
     x: point.x * 100,
     y: point.y * 100,
   }
+}
+
+function scaledDistance(a: NormalizedPoint, b: NormalizedPoint) {
+  return Math.hypot(a.x - b.x, (a.y - b.y) * gameConfig.battlefieldHeightToWidthRatio)
+}
+
+export function closestPointOnSegment(point: NormalizedPoint, start: NormalizedPoint, end: NormalizedPoint) {
+  const vx = end.x - start.x
+  const vy = (end.y - start.y) * gameConfig.battlefieldHeightToWidthRatio
+  const wx = point.x - start.x
+  const wy = (point.y - start.y) * gameConfig.battlefieldHeightToWidthRatio
+  const lengthSquared = vx * vx + vy * vy
+  const t = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, (wx * vx + wy * vy) / lengthSquared))
+  return {
+    x: start.x + (end.x - start.x) * t,
+    y: start.y + (end.y - start.y) * t,
+  }
+}
+
+export function closestPointOnPath(point: NormalizedPoint, path: NormalizedPoint[]) {
+  let closest = path[0]
+  let distance = Number.POSITIVE_INFINITY
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const candidate = closestPointOnSegment(point, path[index], path[index + 1])
+    const candidateDistance = scaledDistance(point, candidate)
+    if (candidateDistance < distance) {
+      closest = candidate
+      distance = candidateDistance
+    }
+  }
+  return { point: closest, distance }
+}
+
+export function distancePointToPath(point: NormalizedPoint, path: NormalizedPoint[]) {
+  return closestPointOnPath(point, path).distance
+}
+
+export function isNearRoadCorner(point: NormalizedPoint, pathId: EnemyPathId) {
+  return enemyPaths[pathId].points.slice(1, -1).some((corner) => scaledDistance(point, corner) <= roadClearanceConfig.cornerInfluenceRatio)
+}
+
+export function requiredRoadClearanceForPoint(point: NormalizedPoint, pathId: EnemyPathId) {
+  return isNearRoadCorner(point, pathId) ? roadClearanceConfig.cornerMinimumRatio : roadClearanceConfig.minimumRatio
 }
 
 export function pathPointsAttribute(pathId: EnemyPathId) {

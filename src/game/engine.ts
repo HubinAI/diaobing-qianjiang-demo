@@ -1,6 +1,6 @@
 import { gameConfig, getRecruitCost } from '../config/gameConfig'
-import { playerRoadLayouts, type NormalizedPoint } from './paths'
-import type { DeploymentSlot, GameState, LaneId, RunMetrics, SideId } from '../types/game'
+import { distancePointToPath, enemyPaths, playerRoadLayouts, requiredRoadClearanceForPoint, roadClearanceConfig, type NormalizedPoint } from './paths'
+import type { DeploymentSlot, EnemyPathId, GameState, LaneId, RunMetrics, SideId } from '../types/game'
 
 export type BaseDeploymentSlot = Omit<DeploymentSlot, 'id' | 'sideId' | 'occupantId' | 'adjacentRoadId'>
 
@@ -51,8 +51,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: true,
     index: 0,
-    roadPoint: { x: 0.13, y: leftRoad.horizontal.start.y },
-    offset: { x: 0, y: 0.08 },
+    roadPoint: { x: 0.14, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.14 },
   },
   {
     baseId: 'left-active-1',
@@ -61,8 +61,9 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: true,
     index: 1,
-    roadPoint: { x: 0.24, y: leftRoad.horizontal.start.y },
-    offset: { x: 0, y: 0.08 },
+    roadPoint: { x: 0.25, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.14 },
+    targetPoint: leftRoad.turn[0],
   },
   {
     baseId: 'left-active-2',
@@ -71,9 +72,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: true,
     index: 2,
-    roadPoint: { x: 0.35, y: leftRoad.horizontal.start.y },
-    offset: { x: 0, y: 0.087 },
-    targetPoint: leftRoad.turn[1],
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.77 },
+    offset: { x: -0.125, y: 0 },
   },
   {
     baseId: 'left-active-3',
@@ -82,8 +82,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: true,
     index: 3,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.735 },
-    offset: { x: -0.13, y: 0 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.87 },
+    offset: { x: -0.125, y: 0 },
   },
   {
     baseId: 'left-active-4',
@@ -92,8 +92,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: true,
     index: 4,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.825 },
-    offset: { x: -0.062, y: 0 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.97 },
+    offset: { x: -0.125, y: 0 },
   },
   {
     baseId: 'left-locked-0',
@@ -102,8 +102,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: false,
     index: 5,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.915 },
-    offset: { x: -0.13, y: 0 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.79 },
+    offset: { x: -0.24, y: 0 },
   },
   {
     baseId: 'left-locked-1',
@@ -112,8 +112,8 @@ const leftSlotAnchors: SlotAnchor[] = [
     adjacentRoadKey: 'left',
     unlocked: false,
     index: 6,
-    roadPoint: { x: leftRoad.vertical.end.x, y: leftRoad.vertical.end.y },
-    offset: { x: -0.058, y: 0.02 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.9 },
+    offset: { x: -0.24, y: 0 },
   },
 ]
 
@@ -148,9 +148,27 @@ const slotPlan: SlotTemplate[] = [
   ...leftSlotPlan.map(mirrorSlotHorizontally),
 ]
 
+function slotClearancePathIds(sideId: SideId, slot: SlotTemplate): EnemyPathId[] {
+  if (slot.adjacentRoadKey === 'merge') return [`${sideId}-left`, `${sideId}-right`]
+  return [`${sideId}-${slot.adjacentRoadKey}`]
+}
+
+function assertSlotClearance(slot: DeploymentSlot, template: SlotTemplate) {
+  const pathIds = slotClearancePathIds(slot.sideId, template)
+  const distances = pathIds.map((pathId) => ({
+    pathId,
+    distance: distancePointToPath(slot, enemyPaths[pathId].points),
+    required: template.adjacentRoadKey === 'merge' ? roadClearanceConfig.minimumRatio : requiredRoadClearanceForPoint(slot, pathId),
+  }))
+  const nearest = distances.reduce((best, current) => (current.distance < best.distance ? current : best))
+  if (nearest.distance + 0.000001 < nearest.required) {
+    throw new Error(`Deployment slot ${slot.id} is inside road safety corridor for ${nearest.pathId}: ${nearest.distance.toFixed(4)} < ${nearest.required.toFixed(4)}`)
+  }
+}
+
 export function createInitialSlots(sideId: SideId = 'player'): DeploymentSlot[] {
   return slotPlan.map((slot) => {
-    return {
+    const deploymentSlot = {
       id: `${sideId}-${slot.baseId}`,
       sideId,
       zone: slot.zone,
@@ -162,6 +180,8 @@ export function createInitialSlots(sideId: SideId = 'player'): DeploymentSlot[] 
       y: sideId === 'player' ? slot.y : 1 - slot.y,
       facingAngleDeg: sideId === 'player' ? slot.facingAngleDeg : mirrorFacingVertically(slot.facingAngleDeg),
     }
+    assertSlotClearance(deploymentSlot, slot)
+    return deploymentSlot
   })
 }
 

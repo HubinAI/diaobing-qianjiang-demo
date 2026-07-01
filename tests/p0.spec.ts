@@ -151,8 +151,8 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   })
   layoutRelation.forEach((slot) => {
     expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(24)
-    expect(slot.roadDistance, slot.id).toBeGreaterThanOrEqual(0.06)
-    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(0.13)
+    expect(slot.roadDistance, slot.id).toBeGreaterThanOrEqual(0.105)
+    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(0.24)
     expect(slot.facingDot, slot.id).toBeGreaterThan(0.04)
   })
 })
@@ -259,10 +259,10 @@ test('renders spear thrust visuals from the shared attack geometry', async ({ pa
   })
   await page.getByTestId('recruit-slot-0').locator('.reserve-item').dragTo(page.getByTestId('player-left-active-3'))
   await page.evaluate(() => {
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.834)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.84)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.846)
-    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.852)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.928)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.934)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.94)
+    window.__gameDebug!.spawnEnemy('player', 'left', 'normal', 0.946)
     window.__gameDebug!.advanceTime(0.05)
   })
 

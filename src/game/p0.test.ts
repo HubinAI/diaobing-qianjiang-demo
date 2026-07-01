@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { executeGameCommand, duelReducer } from './commandBus'
-import { createInitialGameState, createInitialDuelState } from '../state/gameStore'
+import { createInitialGameState, createInitialDuelState, sideReducer } from '../state/gameStore'
 import { createInitialSlots, mirrorFacingVertically } from './engine'
-import { enemyPaths, pathIdFor, playerPathPoints, samplePath, type NormalizedPoint } from './paths'
+import { enemyPaths, pathIdFor, playerPathPoints, requiredRoadClearanceForPoint, roadClearanceConfig, samplePath, type NormalizedPoint } from './paths'
 import { mapLegacySlotId, slotLayoutVersion } from './slotLayout'
 import { getCompatibleGhostFiles } from '../ghost/ghostRepository'
 import { validateGhostRunFile } from '../ghost/ghostValidator'
-import type { DuelGameState, ReserveItem, Star, TroopType } from '../types/game'
+import type { DuelGameState, GameState, ReserveItem, Star, TroopUnit, TroopType } from '../types/game'
 
 function advanceDuel(seconds: number) {
   const state = createInitialDuelState('duel-seed-001', 'playing')
@@ -72,6 +72,25 @@ function facingDot(slot: { x: number; y: number; facingAngleDeg: number }, targe
   return fx * tx + fy * ty
 }
 
+function fillUnlockedSlots(state: GameState): GameState {
+  const troops: Record<string, TroopUnit> = {}
+  const slots = state.slots.map((slot) => {
+    if (!slot.unlocked) return slot
+    const unitId = `blocker-${slot.id}`
+    troops[unitId] = {
+      id: unitId,
+      kind: 'troop',
+      troopType: 'blade',
+      star: 1,
+      lane: slot.lane,
+      slotId: slot.id,
+      nextAttackAt: 999,
+    }
+    return { ...slot, occupantId: unitId }
+  })
+  return { ...state, slots, troops }
+}
+
 describe('round 5 ghost duel core', () => {
   it('builds vertically mirrored paths and deployment slots', () => {
     expect(pathIdFor('player', 'left')).toBe('player-left')
@@ -79,8 +98,8 @@ describe('round 5 ghost duel core', () => {
 
     expect(playerPathPoints.right).toEqual(playerPathPoints.left.map((point) => ({ x: 1 - point.x, y: point.y })))
     expect(playerPathPoints.left[0].y).toBeCloseTo(playerPathPoints.left[1].y)
-    expect(playerPathPoints.left[playerPathPoints.left.length - 1].x).toBeCloseTo(0.42)
-    expect(playerPathPoints.right[playerPathPoints.right.length - 1].x).toBeCloseTo(0.58)
+    expect(playerPathPoints.left[playerPathPoints.left.length - 1].x).toBeCloseTo(0.39)
+    expect(playerPathPoints.right[playerPathPoints.right.length - 1].x).toBeCloseTo(0.61)
 
     for (const entrySide of ['left', 'right'] as const) {
       for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
@@ -125,11 +144,26 @@ describe('round 5 ghost duel core', () => {
       expect(slot.x).toBeGreaterThanOrEqual(0.12)
       expect(slot.x).toBeLessThanOrEqual(0.88)
       const road = slot.zone === 'left' ? playerPathPoints.left : playerPathPoints.right
+      const pathId = pathIdFor('player', slot.zone as 'left' | 'right')
       const closest = closestPointOnPath(slot, road)
-      expect(closest.distance, slot.id).toBeGreaterThanOrEqual(0.06)
-      expect(closest.distance, slot.id).toBeLessThanOrEqual(0.13)
+      expect(closest.distance, slot.id).toBeGreaterThanOrEqual(requiredRoadClearanceForPoint(slot, pathId))
+      expect(closest.distance, slot.id).toBeLessThanOrEqual(0.24)
       expect(facingDot(slot, closest.point), slot.id).toBeGreaterThan(0.04)
     })
+
+    playerSlots
+      .filter((slot) => slot.zone === 'center')
+      .forEach((slot) => {
+        const distances = (['left', 'right'] as const).map((entrySide) => {
+          const pathId = pathIdFor('player', entrySide)
+          return {
+            pathId,
+            closest: closestPointOnPath(slot, playerPathPoints[entrySide]),
+          }
+        })
+        const nearest = distances.reduce((best, current) => (current.closest.distance < best.closest.distance ? current : best))
+        expect(nearest.closest.distance, slot.id).toBeGreaterThanOrEqual(roadClearanceConfig.minimumRatio)
+      })
 
     const slotSize = 36
     for (let outer = 0; outer < playerSlots.length; outer += 1) {
@@ -140,6 +174,28 @@ describe('round 5 ghost duel core', () => {
 
     expect(mapLegacySlotId('ghost-left-active-2')).toBe('ghost-left-active-2')
     expect(mapLegacySlotId('ghost-right-locked-0')).toBe('ghost-right-locked-0')
+  })
+
+  it('keeps enemy movement independent from occupied deployment slots', () => {
+    const base = {
+      ...createInitialGameState('clearance-seed', 'playing', 'player'),
+      waveBreakRemaining: 999,
+    }
+    let empty = sideReducer(base, { type: 'spawnEnemy', lane: 'left', enemyType: 'normal', progress: 0.42 })
+    let filled = sideReducer(fillUnlockedSlots(base), { type: 'spawnEnemy', lane: 'left', enemyType: 'normal', progress: 0.42 })
+
+    empty = sideReducer(empty, { type: 'tick', delta: 2 })
+    filled = sideReducer(filled, { type: 'tick', delta: 2 })
+
+    const emptyEnemy = Object.values(empty.enemies)[0]
+    const filledEnemy = Object.values(filled.enemies)[0]
+    const emptyPoint = samplePath(emptyEnemy.pathId, emptyEnemy.progress)
+    const filledPoint = samplePath(filledEnemy.pathId, filledEnemy.progress)
+
+    expect(filledEnemy.pathId).toBe(emptyEnemy.pathId)
+    expect(filledEnemy.progress).toBeCloseTo(emptyEnemy.progress)
+    expect(filledPoint.x).toBeCloseTo(emptyPoint.x)
+    expect(filledPoint.y).toBeCloseTo(emptyPoint.y)
   })
 
   it('keeps side recruit batches deterministic with the same seed', () => {
