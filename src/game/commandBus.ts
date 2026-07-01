@@ -1,5 +1,6 @@
 import { duelConfig, gameConfig, getRecruitCost } from '../config/gameConfig'
 import { getGhostFileByDifficulty } from '../ghost/ghostRepository'
+import { mapLegacySlotId } from './slotLayout'
 import type {
   DeployPayload,
   EquipWeaponPayload,
@@ -123,6 +124,10 @@ function slotUnitDrop(side: GameState, slotId: string): DragPayload | undefined 
   return slot?.occupantId ? { source: 'slot', unitId: slot.occupantId } : undefined
 }
 
+function commandSlotId(slotId: string) {
+  return mapLegacySlotId(slotId) ?? slotId
+}
+
 function commandFailure(state: DuelGameState, command: GameCommand, reason: string) {
   if (command.source !== 'ghost') return { ok: false, state, reason }
   const failure = {
@@ -168,35 +173,40 @@ export function executeGameCommand(state: DuelGameState, command: GameCommand) {
     const payload = command.payload as DeployPayload
     const item = findRecruitItem(side, payload.item)
     if (!item) return commandFailure(state, command, 'item_mismatch')
-    const slot = side.slots.find((candidate) => candidate.id === payload.targetSlotId)
+    const targetSlotId = commandSlotId(payload.targetSlotId)
+    const slot = side.slots.find((candidate) => candidate.id === targetSlotId)
     if (!slot) return commandFailure(state, command, 'unknown')
     if (!slot.unlocked) return commandFailure(state, command, 'slot_locked')
     const next = applySideAction(state, command.sideId, {
       type: 'drop',
       payload: { source: 'reserve', itemId: item.id },
-      target: { type: 'slot', slotId: payload.targetSlotId },
+      target: { type: 'slot', slotId: targetSlotId },
     })
     return { ok: !next[command.sideId].reserveItems.some((candidate) => candidate.id === item.id), state: next }
   }
 
   if (command.type === 'move') {
     const payload = command.payload as MovePayload
-    const drag = slotUnitDrop(side, payload.fromSlotId)
+    const fromSlotId = commandSlotId(payload.fromSlotId)
+    const targetSlotId = commandSlotId(payload.targetSlotId)
+    const drag = slotUnitDrop(side, fromSlotId)
     if (!drag) return commandFailure(state, command, 'item_mismatch')
-    const target = side.slots.find((slot) => slot.id === payload.targetSlotId)
+    const target = side.slots.find((slot) => slot.id === targetSlotId)
     if (!target) return commandFailure(state, command, 'unknown')
     if (!target.unlocked) return commandFailure(state, command, 'slot_locked')
-    const next = applySideAction(state, command.sideId, { type: 'drop', payload: drag, target: { type: 'slot', slotId: payload.targetSlotId } })
+    const next = applySideAction(state, command.sideId, { type: 'drop', payload: drag, target: { type: 'slot', slotId: targetSlotId } })
     return { ok: true, state: next }
   }
 
   if (command.type === 'merge') {
     const payload = command.payload as MergePayload
-    const drag = slotUnitDrop(side, payload.fromSlotId)
+    const fromSlotId = commandSlotId(payload.fromSlotId)
+    const targetSlotId = commandSlotId(payload.targetSlotId)
+    const drag = slotUnitDrop(side, fromSlotId)
     if (!drag) return commandFailure(state, command, 'item_mismatch')
-    const next = applySideAction(state, command.sideId, { type: 'drop', payload: drag, target: { type: 'slot', slotId: payload.targetSlotId } })
+    const next = applySideAction(state, command.sideId, { type: 'drop', payload: drag, target: { type: 'slot', slotId: targetSlotId } })
     const nextSide = next[command.sideId]
-    const targetSlot = nextSide.slots.find((slot) => slot.id === payload.targetSlotId)
+    const targetSlot = nextSide.slots.find((slot) => slot.id === targetSlotId)
     const targetUnit = targetSlot?.occupantId ? nextSide.troops[targetSlot.occupantId] ?? nextSide.generals[targetSlot.occupantId] : undefined
     if (!targetUnit || targetUnit.star !== payload.expectedResultStar) return commandFailure(next, command, 'merge_mismatch')
     return { ok: true, state: next }
@@ -204,25 +214,27 @@ export function executeGameCommand(state: DuelGameState, command: GameCommand) {
 
   if (command.type === 'unlock_slot') {
     const payload = command.payload as UnlockSlotPayload
-    const slot = side.slots.find((candidate) => candidate.id === payload.targetSlotId)
+    const targetSlotId = commandSlotId(payload.targetSlotId)
+    const slot = side.slots.find((candidate) => candidate.id === targetSlotId)
     if (!slot) return commandFailure(state, command, 'unknown')
     if (slot.unlocked) return { ok: true, state }
     if (side.autoShovels <= 0) return commandFailure(state, command, 'insufficient_coins')
     const selected = applySideAction(state, command.sideId, { type: 'selectAutoShovel' })
-    const next = applySideAction(selected, command.sideId, { type: 'unlockSelectedSlot', slotId: payload.targetSlotId })
-    return { ok: next[command.sideId].slots.some((candidate) => candidate.id === payload.targetSlotId && candidate.unlocked), state: next }
+    const next = applySideAction(selected, command.sideId, { type: 'unlockSelectedSlot', slotId: targetSlotId })
+    return { ok: next[command.sideId].slots.some((candidate) => candidate.id === targetSlotId && candidate.unlocked), state: next }
   }
 
   if (command.type === 'upgrade_general') {
     const payload = command.payload as UpgradeGeneralPayload
     const item = findRecruitItem(side, payload.item)
     if (!item) return commandFailure(state, command, 'item_mismatch')
+    const targetGeneralSlotId = commandSlotId(payload.targetGeneralSlotId)
     const next = applySideAction(state, command.sideId, {
       type: 'drop',
       payload: { source: 'reserve', itemId: item.id },
-      target: { type: 'slot', slotId: payload.targetGeneralSlotId },
+      target: { type: 'slot', slotId: targetGeneralSlotId },
     })
-    const targetSlot = next[command.sideId].slots.find((slot) => slot.id === payload.targetGeneralSlotId)
+    const targetSlot = next[command.sideId].slots.find((slot) => slot.id === targetGeneralSlotId)
     const targetUnit = targetSlot?.occupantId ? next[command.sideId].generals[targetSlot.occupantId] : undefined
     if (!targetUnit || targetUnit.star !== payload.expectedResultStar) return commandFailure(next, command, 'merge_mismatch')
     return { ok: true, state: next }
@@ -232,10 +244,11 @@ export function executeGameCommand(state: DuelGameState, command: GameCommand) {
     const payload = command.payload as EquipWeaponPayload
     const item = findRecruitItem(side, payload.item)
     if (!item) return commandFailure(state, command, 'item_mismatch')
+    const targetGeneralSlotId = commandSlotId(payload.targetGeneralSlotId)
     const next = applySideAction(state, command.sideId, {
       type: 'drop',
       payload: { source: 'reserve', itemId: item.id },
-      target: { type: 'slot', slotId: payload.targetGeneralSlotId },
+      target: { type: 'slot', slotId: targetGeneralSlotId },
     })
     return { ok: true, state: next }
   }

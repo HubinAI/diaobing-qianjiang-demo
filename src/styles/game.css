@@ -1013,9 +1013,10 @@ button {
 
 .deployment-scene-layer .deployment-slot {
   position: absolute;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
+  width: clamp(34px, 36px, 56px);
+  height: clamp(34px, 36px, 56px);
+  min-width: 34px;
+  aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;

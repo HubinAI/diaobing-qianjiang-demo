@@ -45,19 +45,46 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   await expect(page.getByTestId('lead-status')).toBeVisible()
   await expect(page.getByTestId('duel-phase')).toHaveAttribute('data-value', 'playing')
 
-  await expect(page.locator('[data-side-id="player"]')).toHaveCount(14)
-  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(14)
+  await expect(page.locator('[data-side-id="player"]')).toHaveCount(16)
+  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(16)
   await expect(page.getByTestId('path-player-left')).toBeVisible()
   await expect(page.getByTestId('path-player-right')).toBeVisible()
   await expect(page.getByTestId('path-ghost-left')).toBeVisible()
   await expect(page.getByTestId('path-ghost-right')).toBeVisible()
 
   const state = await debugState(page)
+  expect(state.player.slots.filter((slot) => slot.zone === 'left')).toHaveLength(7)
+  expect(state.player.slots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
+  expect(state.player.slots.filter((slot) => slot.zone === 'right')).toHaveLength(7)
+  expect(state.player.slots.filter((slot) => slot.unlocked)).toHaveLength(11)
+  expect(state.player.slots.filter((slot) => !slot.unlocked)).toHaveLength(5)
   state.player.slots.forEach((slot, index) => {
     const ghost = state.ghost.slots[index]
     expect(ghost.x).toBeCloseTo(slot.x)
     expect(ghost.y).toBeCloseTo(1 - slot.y)
   })
+
+  const minGap = await page.evaluate(() => {
+    const slots = [...document.querySelectorAll<HTMLElement>('[data-side-id="player"]')]
+      .map((element) => {
+        const rect = element.getBoundingClientRect()
+        return { id: element.dataset.slotId, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, size: Math.max(rect.width, rect.height) }
+      })
+    let gap = Number.POSITIVE_INFINITY
+    let pair = ''
+    for (let outer = 0; outer < slots.length; outer += 1) {
+      for (let inner = outer + 1; inner < slots.length; inner += 1) {
+        const distance = Math.hypot(slots[outer].x - slots[inner].x, slots[outer].y - slots[inner].y)
+        const currentGap = distance - Math.max(slots[outer].size, slots[inner].size)
+        if (currentGap < gap) {
+          gap = currentGap
+          pair = `${slots[outer].id}/${slots[inner].id}`
+        }
+      }
+    }
+    return { gap, pair }
+  })
+  expect(minGap.gap, minGap.pair).toBeGreaterThanOrEqual(0)
 })
 
 test('shows opponent Diaochan live HP in the former time slot', async ({ page }) => {

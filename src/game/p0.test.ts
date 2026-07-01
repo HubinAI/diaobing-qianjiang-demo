@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { executeGameCommand, duelReducer } from './commandBus'
 import { createInitialGameState, createInitialDuelState } from '../state/gameStore'
-import { createInitialSlots } from './engine'
+import { createInitialSlots, mirrorFacingVertically } from './engine'
 import { enemyPaths, pathIdFor, samplePath } from './paths'
+import { mapLegacySlotId, slotLayoutVersion } from './slotLayout'
 import { getCompatibleGhostFiles } from '../ghost/ghostRepository'
 import { validateGhostRunFile } from '../ghost/ghostValidator'
 import type { DuelGameState, ReserveItem, Star, TroopType } from '../types/game'
@@ -27,6 +28,10 @@ function occupantId(state: DuelGameState, slotId: string) {
   return state.player.slots.find((slot) => slot.id === slotId)?.occupantId
 }
 
+function pixelDistance(a: { x: number; y: number }, b: { x: number; y: number }, width = 348, height = 405.34) {
+  return Math.hypot((a.x - b.x) * width, (a.y - b.y) * height)
+}
+
 describe('round 5 ghost duel core', () => {
   it('builds vertically mirrored paths and deployment slots', () => {
     expect(pathIdFor('player', 'left')).toBe('player-left')
@@ -43,13 +48,40 @@ describe('round 5 ghost duel core', () => {
 
     const playerSlots = createInitialSlots('player')
     const ghostSlots = createInitialSlots('ghost')
-    expect(playerSlots).toHaveLength(14)
-    expect(ghostSlots).toHaveLength(14)
+    expect(slotLayoutVersion).toBe(2)
+    expect(playerSlots).toHaveLength(16)
+    expect(ghostSlots).toHaveLength(16)
+    expect(playerSlots.filter((slot) => slot.unlocked)).toHaveLength(11)
+    expect(playerSlots.filter((slot) => !slot.unlocked)).toHaveLength(5)
+    expect(playerSlots.filter((slot) => slot.zone === 'left')).toHaveLength(7)
+    expect(playerSlots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
+    expect(playerSlots.filter((slot) => slot.zone === 'right')).toHaveLength(7)
+
     playerSlots.forEach((slot, index) => {
       expect(ghostSlots[index].x).toBeCloseTo(slot.x)
       expect(ghostSlots[index].y).toBeCloseTo(1 - slot.y)
+      expect(ghostSlots[index].facingAngleDeg).toBeCloseTo(mirrorFacingVertically(slot.facingAngleDeg))
       expect(ghostSlots[index].unlocked).toBe(slot.unlocked)
     })
+
+    for (let index = 0; index < 7; index += 1) {
+      const status = index < 5 ? 'active' : 'locked'
+      const localIndex = index < 5 ? index : index - 5
+      const left = playerSlots.find((slot) => slot.id === `player-left-${status}-${localIndex}`)!
+      const right = playerSlots.find((slot) => slot.id === `player-right-${status}-${localIndex}`)!
+      expect(right.x).toBeCloseTo(1 - left.x)
+      expect(right.y).toBeCloseTo(left.y)
+    }
+
+    const slotSize = 348 * 0.105
+    for (let outer = 0; outer < playerSlots.length; outer += 1) {
+      for (let inner = outer + 1; inner < playerSlots.length; inner += 1) {
+        expect(pixelDistance(playerSlots[outer], playerSlots[inner])).toBeGreaterThanOrEqual(slotSize * 1.18)
+      }
+    }
+
+    expect(mapLegacySlotId('ghost-left-active-2')).toBe('ghost-left-active-2')
+    expect(mapLegacySlotId('ghost-right-locked-0')).toBe('ghost-right-locked-0')
   })
 
   it('keeps side recruit batches deterministic with the same seed', () => {

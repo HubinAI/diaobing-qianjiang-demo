@@ -3,39 +3,51 @@ import type { DeploymentSlot, GameState, LaneId, RunMetrics, SideId } from '../t
 
 export type BaseDeploymentSlot = Omit<DeploymentSlot, 'id' | 'sideId' | 'occupantId'>
 
-const slotPlan: Array<BaseDeploymentSlot & { baseId: string }> = [
-  { baseId: 'left-active-0', zone: 'left', lane: 'left', unlocked: true, index: 0, x: 0.105, y: 0.34, facingAngleDeg: 8 },
-  { baseId: 'left-active-1', zone: 'left', lane: 'left', unlocked: true, index: 1, x: 0.155, y: 0.5, facingAngleDeg: 2 },
-  { baseId: 'left-active-2', zone: 'left', lane: 'left', unlocked: true, index: 2, x: 0.225, y: 0.66, facingAngleDeg: 4 },
-  { baseId: 'left-active-3', zone: 'left', lane: 'left', unlocked: true, index: 3, x: 0.305, y: 0.8, facingAngleDeg: 14 },
-  { baseId: 'left-locked-0', zone: 'left', lane: 'left', unlocked: false, index: 4, x: 0.075, y: 0.49, facingAngleDeg: 0 },
-  { baseId: 'left-locked-1', zone: 'left', lane: 'left', unlocked: false, index: 5, x: 0.16, y: 0.75, facingAngleDeg: 6 },
-  { baseId: 'center-active-0', zone: 'center', lane: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.8, facingAngleDeg: -90 },
-  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.63, facingAngleDeg: -90 },
-  { baseId: 'right-active-0', zone: 'right', lane: 'right', unlocked: true, index: 0, x: 0.895, y: 0.34, facingAngleDeg: 172 },
-  { baseId: 'right-active-1', zone: 'right', lane: 'right', unlocked: true, index: 1, x: 0.845, y: 0.5, facingAngleDeg: 178 },
-  { baseId: 'right-active-2', zone: 'right', lane: 'right', unlocked: true, index: 2, x: 0.775, y: 0.66, facingAngleDeg: 184 },
-  { baseId: 'right-active-3', zone: 'right', lane: 'right', unlocked: true, index: 3, x: 0.695, y: 0.8, facingAngleDeg: 194 },
-  { baseId: 'right-locked-0', zone: 'right', lane: 'right', unlocked: false, index: 4, x: 0.925, y: 0.49, facingAngleDeg: 180 },
-  { baseId: 'right-locked-1', zone: 'right', lane: 'right', unlocked: false, index: 5, x: 0.84, y: 0.75, facingAngleDeg: 174 },
+type SlotTemplate = BaseDeploymentSlot & { baseId: string }
+
+const leftSlotPlan: SlotTemplate[] = [
+  { baseId: 'left-active-0', zone: 'left', lane: 'left', unlocked: true, index: 0, x: 0.06, y: 0.56, facingAngleDeg: 10 },
+  { baseId: 'left-active-1', zone: 'left', lane: 'left', unlocked: true, index: 1, x: 0.15, y: 0.64, facingAngleDeg: 4 },
+  { baseId: 'left-active-2', zone: 'left', lane: 'left', unlocked: true, index: 2, x: 0.24, y: 0.56, facingAngleDeg: 12 },
+  { baseId: 'left-active-3', zone: 'left', lane: 'left', unlocked: true, index: 3, x: 0.33, y: 0.64, facingAngleDeg: 4 },
+  { baseId: 'left-active-4', zone: 'left', lane: 'left', unlocked: true, index: 4, x: 0.06, y: 0.73, facingAngleDeg: -2 },
+  { baseId: 'left-locked-0', zone: 'left', lane: 'left', unlocked: false, index: 5, x: 0.1, y: 0.84, facingAngleDeg: -4 },
+  { baseId: 'left-locked-1', zone: 'left', lane: 'left', unlocked: false, index: 6, x: 0.12, y: 0.96, facingAngleDeg: -8 },
 ]
 
-function playerY(y: number) {
-  return 0.5 + y * 0.5
-}
+const centerSlotPlan: SlotTemplate[] = [
+  { baseId: 'center-active-0', zone: 'center', lane: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.7, facingAngleDeg: -90 },
+  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.84, facingAngleDeg: -90 },
+]
 
 function normalizeAngle(angleDeg: number) {
   const normalized = ((angleDeg + 180) % 360 + 360) % 360 - 180
   return Object.is(normalized, -0) ? 0 : normalized
 }
 
+function mirrorSlotHorizontally(slot: SlotTemplate): SlotTemplate {
+  return {
+    ...slot,
+    baseId: slot.baseId.replace('left-', 'right-'),
+    zone: 'right',
+    lane: 'right',
+    x: 1 - slot.x,
+    facingAngleDeg: normalizeAngle(180 - slot.facingAngleDeg),
+  }
+}
+
 export function mirrorFacingVertically(angleDeg: number) {
   return normalizeAngle(-angleDeg)
 }
 
+const slotPlan: SlotTemplate[] = [
+  ...leftSlotPlan,
+  ...centerSlotPlan,
+  ...leftSlotPlan.map(mirrorSlotHorizontally),
+]
+
 export function createInitialSlots(sideId: SideId = 'player'): DeploymentSlot[] {
   return slotPlan.map((slot) => {
-    const y = playerY(slot.y)
     return {
       id: `${sideId}-${slot.baseId}`,
       sideId,
@@ -44,7 +56,7 @@ export function createInitialSlots(sideId: SideId = 'player'): DeploymentSlot[] 
       unlocked: slot.unlocked,
       index: slot.index,
       x: slot.x,
-      y: sideId === 'player' ? y : 1 - y,
+      y: sideId === 'player' ? slot.y : 1 - slot.y,
       facingAngleDeg: sideId === 'player' ? slot.facingAngleDeg : mirrorFacingVertically(slot.facingAngleDeg),
     }
   })
@@ -69,8 +81,8 @@ export function createInitialMetrics(seed: string): RunMetrics {
     mergeCount: 0,
     crossLaneMoveCount: 0,
     shovelUseCount: 0,
-    unlockedSlotCount: 9,
-    maxUnlockedSlots: 9,
+    unlockedSlotCount: 11,
+    maxUnlockedSlots: 11,
     generalsObtained: [],
     generalStarLevels: {},
     exclusiveWeaponsEquipped: [],

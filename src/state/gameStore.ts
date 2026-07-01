@@ -762,7 +762,7 @@ export function sideReducer(state: GameState, action: SideAction): GameState {
         slots: state.slots.map((slot) => ({ ...slot, unlocked: true })),
         nextShovelAt: Number.POSITIVE_INFINITY,
         selectedShovel: undefined,
-        metrics: { ...state.metrics, maxUnlockedSlots: 14, unlockedSlotCount: 14 },
+        metrics: { ...state.metrics, maxUnlockedSlots: 16, unlockedSlotCount: 16 },
       }
     case 'clearReserve':
       return { ...state, reserveItems: [] }
