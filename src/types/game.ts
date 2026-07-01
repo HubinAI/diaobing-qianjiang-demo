@@ -7,6 +7,8 @@ export type GeneralId = 'guanyu' | 'zhaoyun' | 'huangzhong'
 export type WeaponId = 'greenDragonBlade' | 'dragonSpear' | 'sunsetBow'
 export type EnemyType = 'normal' | 'fast' | 'heavy' | 'boss'
 export type Star = 1 | 2 | 3 | 4 | 5
+import type { WaveConfig } from '../game/waves'
+
 export type EnemyPathId = 'player-left' | 'player-right' | 'ghost-left' | 'ghost-right'
 export type AttackShape = 'circle' | 'strip' | 'arc'
 
@@ -176,6 +178,7 @@ export interface GameState {
   recruitRngState: number
   elapsedSeconds: number
   speedMultiplier: number
+  waveTable: WaveConfig[]
   waveIndex: number
   waveElapsed: number
   waveBreakRemaining: number

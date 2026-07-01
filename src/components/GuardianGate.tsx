@@ -11,11 +11,13 @@ function hpPercent(hp: number) {
 
 export function GuardianGate({ state }: GuardianGateProps) {
   const playerHp = hpPercent(state.player.guardianHp)
-  const crisisText = playerHp <= 30 ? '危机' : '守稳'
+  const isCritical = playerHp <= 20
+  const isDanger = playerHp <= 30 && playerHp > 20
+  const crisisText = isCritical ? '危！' : isDanger ? '危机' : '守稳'
 
   return (
-    <section className={`guardian-gate duel-guardian-gate ${playerHp <= 30 ? 'is-danger' : ''}`} aria-label="我方貂蝉状态" data-testid="player-guardian-zone">
-      <div className={`diaochan-avatar ${playerHp <= 30 ? 'is-danger' : ''}`} data-testid="diaochan-avatar">
+    <section className={`guardian-gate duel-guardian-gate ${isCritical ? 'is-critical' : isDanger ? 'is-danger' : ''}`} aria-label="我方貂蝉状态" data-testid="player-guardian-zone">
+      <div className={`diaochan-avatar ${isCritical ? 'is-critical' : isDanger ? 'is-danger' : ''}`} data-testid="diaochan-avatar">
         <span>貂</span>
       </div>
       <div className="guardian-info">

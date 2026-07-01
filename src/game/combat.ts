@@ -1,7 +1,6 @@
 import { attackShapeConfig, enemyConfig, gameConfig, generalConfig, troopConfig } from '../config/gameConfig'
 import { getAttackGeometryForUnit, getTargetsInAttackArea, troopTypeForUnit, type AttackTarget } from './attackGeometry'
 import { pathIdFor } from './paths'
-import { waves } from './waves'
 import type {
   AttackGeometry,
   AttackImpact,
@@ -50,13 +49,13 @@ function createEnemy(waveIndex: number, targetSide: SideId, entrySide: EntrySide
 }
 
 function allSpawnsCompleted(state: GameState) {
-  const wave = waves[state.waveIndex - 1]
+  const wave = state.waveTable[state.waveIndex - 1]
   if (!wave) return true
   return state.nextSpawnIndex >= wave.spawnQueue.length
 }
 
 function spawnEnemies(state: GameState): GameState {
-  const wave = waves[state.waveIndex - 1]
+  const wave = state.waveTable[state.waveIndex - 1]
   if (!wave) return state
   const targetSide = sideIdFromState(state)
 
@@ -497,14 +496,14 @@ function settleWave(state: GameState): GameState {
   if (state.waveBreakRemaining > 0) return state
   if (!allSpawnsCompleted(state) || Object.keys(state.enemies).length > 0) return state
 
-  if (state.waveIndex >= waves.length) {
+  if (state.waveIndex >= state.waveTable.length) {
     return {
       ...state,
       phase: 'won',
       metrics: {
         ...state.metrics,
         result: 'win',
-        reachedWave: waves.length,
+        reachedWave: state.waveTable.length,
         guardianHpRemaining: state.guardianHp,
       },
     }
@@ -531,7 +530,7 @@ export function tickCombat(state: GameState, delta: number): GameState {
     if (remaining <= 0) {
       nextState = {
         ...nextState,
-        waveIndex: Math.min(waves.length, nextState.waveIndex + 1),
+        waveIndex: Math.min(state.waveTable.length, nextState.waveIndex + 1),
         waveElapsed: 0,
         waveBreakRemaining: 0,
         nextSpawnIndex: 0,

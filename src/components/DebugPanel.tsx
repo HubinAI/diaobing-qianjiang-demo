@@ -42,8 +42,8 @@ export function DebugPanel({ state, onToggle, dispatch }: DebugPanelProps) {
 
   return (
     <aside className={`debug-panel ${state.showDebug ? 'is-open' : ''}`} data-testid="debug-panel">
-      <button type="button" className="debug-toggle" onClick={onToggle}>
-        DEBUG
+      <button type="button" className="debug-toggle" onClick={onToggle} title="调试面板">
+        D
       </button>
       {state.showDebug && (
         <div className="debug-body">

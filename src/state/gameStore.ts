@@ -711,7 +711,7 @@ export function sideReducer(state: GameState, action: SideAction): GameState {
     case 'jumpWave':
       return {
         ...state,
-        waveIndex: Math.min(8, Math.max(1, action.waveIndex)),
+        waveIndex: Math.min(state.waveTable.length, Math.max(1, action.waveIndex)),
         waveElapsed: 0,
         waveBreakRemaining: 0,
         nextSpawnIndex: 0,
@@ -737,7 +737,7 @@ export function sideReducer(state: GameState, action: SideAction): GameState {
       return {
         ...state,
         phase: 'playing',
-        waveIndex: Math.min(8, Math.max(1, action.waveIndex)),
+        waveIndex: Math.min(state.waveTable.length, Math.max(1, action.waveIndex)),
         waveElapsed: 0.01,
         waveBreakRemaining: 0,
         nextSpawnIndex: 0,
@@ -791,7 +791,9 @@ export function sideReducer(state: GameState, action: SideAction): GameState {
 
 export function createInitialDuelState(seed = 'duel-seed-001', phase: DuelGameState['phase'] = 'idle'): DuelGameState {
   const player = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'player')
-  const ghost = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'ghost')
+  // ghost 必须和 player 使用相同的波次表，保证公平对战
+  const ghostBase = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'ghost')
+  const ghost = { ...ghostBase, waveTable: player.waveTable }
   return {
     phase,
     seed,

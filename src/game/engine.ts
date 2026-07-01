@@ -1,5 +1,6 @@
 import { gameConfig, getRecruitCost } from '../config/gameConfig'
 import { distancePointToPath, enemyPaths, playerRoadLayouts, requiredRoadClearanceForPoint, roadClearanceConfig, type NormalizedPoint } from './paths'
+import { getWaveTable, pickRandomWaveTable, type WaveTableId } from './waves'
 import type { DeploymentSlot, EnemyPathId, GameState, LaneId, RunMetrics, SideId } from '../types/game'
 
 export type BaseDeploymentSlot = Omit<DeploymentSlot, 'id' | 'sideId' | 'occupantId' | 'adjacentRoadId'>
@@ -263,6 +264,7 @@ export function hashSeed(seed: string): number {
 
 export function createInitialGameState(seed = 'diaobing-001', phase: GameState['phase'] = 'idle', sideId: SideId = 'player'): GameState {
   const initialRngState = hashSeed(seed)
+  const { table: waveTable } = pickRandomWaveTable(initialRngState)
   return {
     phase,
     seed,
@@ -270,6 +272,7 @@ export function createInitialGameState(seed = 'diaobing-001', phase: GameState['
     recruitRngState: initialRngState,
     elapsedSeconds: 0,
     speedMultiplier: 1,
+    waveTable,
     waveIndex: 1,
     waveElapsed: 0,
     waveBreakRemaining: 0,

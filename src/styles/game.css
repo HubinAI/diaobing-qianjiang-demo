@@ -2200,3 +2200,279 @@ button {
     font-size: 25px;
   }
 }
+
+/* ============================================================
+   新手引导样式
+   ============================================================ */
+.tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  pointer-events: auto;
+}
+
+.tutorial-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.tutorial-tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #f6d27b;
+  border-radius: 12px;
+  padding: 18px 22px;
+  max-width: 340px;
+  color: #e8d5b7;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(246, 210, 123, 0.15);
+  text-align: center;
+  animation: tutorial-slide-in 0.35s ease-out;
+}
+
+@keyframes tutorial-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tutorial-tooltip.tutorial-top {
+  top: 8%;
+}
+
+.tutorial-tooltip.tutorial-bottom {
+  bottom: 8%;
+}
+
+.tutorial-tooltip.tutorial-left {
+  left: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tutorial-tooltip.tutorial-right {
+  left: auto;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tutorial-step-badge {
+  display: inline-block;
+  background: rgba(246, 210, 123, 0.2);
+  color: #f6d27b;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.tutorial-tooltip h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #f6d27b;
+}
+
+.tutorial-tooltip p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c4b99a;
+}
+
+.tutorial-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  gap: 10px;
+}
+
+.tutorial-hint {
+  font-size: 11px;
+  color: #f6d27b;
+  animation: pulse-hint 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-hint {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.tutorial-skip {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #999;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tutorial-skip:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ccc;
+}
+
+/* 开始界面引导文案 */
+.start-intro {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.start-intro h1 {
+  font-size: 28px;
+  color: #f6d27b;
+  margin: 0 0 6px;
+  letter-spacing: 4px;
+}
+
+.start-intro p {
+  font-size: 13px;
+  color: #c4b99a;
+  margin: 0;
+}
+
+/* ============================================================
+   胜负结算增强样式
+   ============================================================ */
+.result-panel.is-win {
+  border-color: #f6d27b;
+  box-shadow: 0 0 30px rgba(246, 210, 123, 0.2);
+}
+
+.result-panel.is-lose {
+  border-color: #c0392b;
+  box-shadow: 0 0 30px rgba(192, 57, 43, 0.15);
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.result-emoji {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.text-gold {
+  color: #f6d27b;
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+
+.text-danger {
+  color: #e74c3c;
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+
+.result-subtitle {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.result-hp-comparison {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hp-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hp-label {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 60px;
+  text-align: right;
+}
+
+.hp-bar-group strong {
+  font-size: 14px;
+  color: #e8d5b7;
+  min-width: 36px;
+}
+
+.result-hp-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.hp-fill-player {
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+}
+
+.hp-fill-ghost {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.result-stats-row {
+  display: flex;
+  justify-content: space-around;
+  margin: 16px 0;
+  gap: 8px;
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f6d27b;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #888;
+}
+
+.result-encouragement {
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  margin-top: 10px;
+}
+
+.replay-button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #f6d27b, #e8b84b);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 6px;
+}
+
+.replay-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 20px rgba(246, 210, 123, 0.4);
+}
