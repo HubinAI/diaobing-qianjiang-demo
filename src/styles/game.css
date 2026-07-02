@@ -1755,6 +1755,8 @@ button {
 
 .reserve-section {
   padding: 0 10px 8px;
+  position: relative;
+  z-index: 5;
 }
 
 .reserve-grid {
