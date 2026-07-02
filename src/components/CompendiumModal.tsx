@@ -20,20 +20,24 @@ export function CompendiumModal({ open, onClose }: CompendiumModalProps) {
           {Object.values(troopConfig).map((item) => (
             <div key={item.label} className="compendium-card">
               <strong>{item.icon}</strong>
-              <span>{item.label}</span>
-              <small>攻击 {item.attack} / 间隔 {item.attackInterval}s</small>
+              <span>{item.label}兵</span>
+              <small>{item.attackStyle}</small>
             </div>
           ))}
         </div>
         <h3>名将与专属武器</h3>
         <div className="compendium-grid">
-          {Object.entries(generalConfig).map(([id, item]) => (
-            <div key={id} className="compendium-card">
-              <strong>{item.icon}</strong>
-              <span>{item.label}</span>
-              <small>{weaponConfig[item.weaponId].label}</small>
-            </div>
-          ))}
+          {Object.entries(generalConfig).map(([id, item]) => {
+            const weapon = weaponConfig[item.weaponId]
+            return (
+              <div key={id} className="compendium-card">
+                <strong>{item.icon}</strong>
+                <span>{item.label}</span>
+                <small>{weapon.label}</small>
+                <small className="combo-effect">{item.comboEffect}</small>
+              </div>
+            )
+          })}
         </div>
       </section>
     </div>

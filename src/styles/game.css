@@ -2145,6 +2145,12 @@ button {
   font-size: 10px;
 }
 
+.compendium-card small.combo-effect {
+  color: #f6d27b;
+  font-size: 9px;
+  font-style: italic;
+}
+
 .result-grid {
   display: grid;
   grid-template-columns: 1fr auto;

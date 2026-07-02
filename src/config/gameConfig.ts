@@ -168,6 +168,7 @@ export const troopConfig: Record<
     attackInterval: number
     activeRangeProgress: number
     colorClass: string
+    attackStyle: string
   }
 > = {
   blade: {
@@ -177,6 +178,7 @@ export const troopConfig: Record<
     attackInterval: 1.05,
     activeRangeProgress: 0.32,
     colorClass: 'unit-blue',
+    attackStyle: '范围攻击',
   },
   spear: {
     label: '枪',
@@ -185,6 +187,7 @@ export const troopConfig: Record<
     attackInterval: 0.85,
     activeRangeProgress: 0.58,
     colorClass: 'unit-green',
+    attackStyle: '贯穿攻击',
   },
   archer: {
     label: '弓',
@@ -193,6 +196,7 @@ export const troopConfig: Record<
     attackInterval: 0.55,
     activeRangeProgress: 0.92,
     colorClass: 'unit-yellow',
+    attackStyle: '单体攻击',
   },
 }
 
@@ -204,6 +208,7 @@ export const generalConfig: Record<
     icon: string
     colorClass: string
     weaponId: WeaponId
+    comboEffect: string
   }
 > = {
   guanyu: {
@@ -212,6 +217,7 @@ export const generalConfig: Record<
     icon: '关羽',
     colorClass: 'general-green',
     weaponId: 'greenDragonBlade',
+    comboEffect: '青龙偃月·横扫千军',
   },
   zhaoyun: {
     label: '赵云',
@@ -219,6 +225,7 @@ export const generalConfig: Record<
     icon: '赵云',
     colorClass: 'general-blue',
     weaponId: 'dragonSpear',
+    comboEffect: '龙胆突刺·破阵',
   },
   huangzhong: {
     label: '黄忠',
@@ -226,6 +233,7 @@ export const generalConfig: Record<
     icon: '黄忠',
     colorClass: 'general-gold',
     weaponId: 'sunsetBow',
+    comboEffect: '落日连珠·百步穿杨',
   },
 }
 
