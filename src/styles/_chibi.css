@@ -9,6 +9,8 @@
   justify-content: flex-end;
   margin-bottom: 0;
   z-index: 10;
+  /* 整体上移，减少与预备区重叠 */
+  transform: translateY(-6px);
 }
 
 /* 情绪气泡 — 移到貂蝉右侧，淡入淡出 */
@@ -71,11 +73,11 @@
 /* 貂蝉血条 — 移到身体下方，简洁进度条 */
 .diaochan-hp-bar {
   position: absolute;
-  bottom: -22px;
+  bottom: -18px;
   left: 50%;
   transform: translateX(-50%);
   width: 34px;
-  z-index: 20;
+  z-index: 30;
   display: flex;
   flex-direction: column;
   align-items: center;
