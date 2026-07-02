@@ -76,7 +76,7 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
             <small data-testid={`star-indicator-${unit.id}`}>{showDps ? `DPS ${dps(unit)}` : stars(unit.star)}</small>
           </div>
         ) : (
-          <span className="slot-ground" aria-hidden="true" />
+          <span className="slot-vacant" aria-label="可放置兵种" />
         )
       ) : (
         <span className="slot-lock" aria-hidden="true">🔒</span>

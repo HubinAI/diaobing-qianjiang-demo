@@ -979,13 +979,6 @@ button {
     0 2px 6px rgba(0, 0, 0, 0.34);
 }
 
-.deployment-slot:empty::after {
-  content: "+";
-  color: rgba(147, 255, 105, 0.35);
-  font-size: 18px;
-  font-weight: 800;
-}
-
 .deployment-slot.is-locked {
   border-color: rgba(176, 133, 76, 0.7);
   border-style: dashed;
@@ -1185,15 +1178,36 @@ button {
     0 0 18px rgba(255, 217, 92, 0.36);
 }
 
-.slot-ground {
-  width: 25px;
-  height: 17px;
-  border: 1px solid rgba(255, 226, 157, 0.22);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(255, 234, 177, 0.14), transparent 64%),
-    rgba(40, 45, 36, 0.42);
-  transform: rotate(-10deg);
+.slot-vacant {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.slot-vacant::before,
+.slot-vacant::after {
+  content: "";
+  position: absolute;
+  background: rgba(93, 255, 122, 0.65);
+  border-radius: 1px;
+}
+
+.slot-vacant::before {
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 100%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 5px rgba(93, 255, 122, 0.45);
+}
+
+.slot-vacant::after {
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 3px;
+  transform: translateY(-50%);
+  box-shadow: 0 0 5px rgba(93, 255, 122, 0.45);
 }
 
 .slot-lock {
