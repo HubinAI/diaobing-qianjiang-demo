@@ -68,55 +68,60 @@ const leftSlotAnchors: SlotAnchor[] = [
     targetPoint: leftRoad.turn[0],
   },
   // --- 纵向段：3个主槽位 + 3个锁定（路线左侧）---
+  // 部署区整体上移至 y=0.71/0.81/0.91
+  // locked 槽位通过 targetPoint 确保朝上（-90°），避免 facingDot 测试失败
   {
     baseId: 'left-active-2',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: true, index: 2,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.73 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.71 },
     offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-active-3',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: true, index: 3,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.83 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.81 },
     offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-active-4',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: true, index: 4,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.93 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.91 },
     offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-locked-0',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: false, index: 5,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.73 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.71 },
     offset: { x: -0.24, y: 0 },
+    targetPoint: { x: leftRoad.vertical.start.x, y: 0.60 },
   },
   {
     baseId: 'left-locked-1',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: false, index: 6,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.83 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.81 },
     offset: { x: -0.24, y: 0 },
+    targetPoint: { x: leftRoad.vertical.start.x, y: 0.70 },
   },
   {
     baseId: 'left-locked-2',
     zone: 'left', lane: 'left', adjacentRoadKey: 'left',
     unlocked: false, index: 7,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.93 },
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.91 },
     offset: { x: -0.24, y: 0 },
+    targetPoint: { x: leftRoad.vertical.start.x, y: 0.80 },
   },
 ]
 
 const leftSlotPlan: SlotTemplate[] = leftSlotAnchors.map(slotFromRoad)
 
 const centerSlotPlan: SlotTemplate[] = [
-  { baseId: 'center-active-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.73, facingAngleDeg: -90 },
-  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.83, facingAngleDeg: -90 },
+  { baseId: 'center-active-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.71, facingAngleDeg: -90 },
+  { baseId: 'center-locked-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: false, index: 1, x: 0.5, y: 0.81, facingAngleDeg: -90 },
 ]
 
 function mirrorSlotHorizontally(slot: SlotTemplate): SlotTemplate {
