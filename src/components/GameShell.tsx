@@ -63,22 +63,44 @@ export function GameShell({ state, dispatch }: GameShellProps) {
     prevPhaseRef.current = state.phase
   }, [state.phase])
 
-  // 自动推进
+  // 自动推进：识别玩家正确操作后立即切换
+  const prevReserveLenRef = useRef(0)
+  const prevDeployCountRef = useRef(0)
+  const prevKillCountRef = useRef(0)
+
   useEffect(() => {
     if (tutorialDone || tutorialStep < 0) return
-    if (tutorialStep === 0 && state.player.reserveItems.length > 0) {
-      const t = setTimeout(() => setTutorialStep(1), 500)
-      return () => clearTimeout(t)
+
+    // 第1步 → 第2步：补兵后 reserveItems 数量增加
+    if (tutorialStep === 0) {
+      const currentLen = state.player.reserveItems.length
+      if (currentLen > prevReserveLenRef.current && currentLen > 0) {
+        setTutorialStep(1)
+      }
+      prevReserveLenRef.current = currentLen
+      return
     }
-    if (tutorialStep === 1 && state.player.metrics.deployCount > 0) {
-      const t = setTimeout(() => setTutorialStep(2), 500)
-      return () => clearTimeout(t)
+
+    // 第2步 → 第3步：部署了一个单位
+    if (tutorialStep === 1) {
+      const currentDeploy = state.player.metrics.deployCount
+      if (currentDeploy > prevDeployCountRef.current) {
+        setTutorialStep(2)
+      }
+      prevDeployCountRef.current = currentDeploy
+      return
     }
-    if (tutorialStep === 2 && state.elapsedSeconds > 10) {
-      const t = setTimeout(() => setTutorialDone(true), 2000)
-      return () => clearTimeout(t)
+
+    // 第3步完成：首次击杀敌人
+    if (tutorialStep === 2) {
+      const currentKills = state.player.metrics.totalKills
+      if (currentKills > prevKillCountRef.current) {
+        const t = setTimeout(() => setTutorialDone(true), 1500)
+        return () => clearTimeout(t)
+      }
+      prevKillCountRef.current = currentKills
     }
-  }, [tutorialDone, tutorialStep, state.player.reserveItems.length, state.player.metrics.deployCount, state.elapsedSeconds])
+  }, [tutorialDone, tutorialStep, state.player.reserveItems.length, state.player.metrics.deployCount, state.player.metrics.totalKills])
 
   const skipTutorial = useCallback(() => setTutorialDone(true), [])
 
