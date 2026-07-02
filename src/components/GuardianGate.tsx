@@ -115,7 +115,10 @@ export function GuardianGate({ state }: GuardianGateProps) {
                 </div>
                 {/* 身体：Q版小身体 */}
                 <div className="chibi-body">
+                  <div className="chibi-neck" />
+                  <div className="chibi-collar" />
                   <div className="chibi-dress" />
+                  <div className="chibi-sash" />
                   <div className="chibi-sleeves" />
                   {/* 手臂：根据情绪变化姿势 */}
                   <div className={`chibi-arms mood-${mood}`} />

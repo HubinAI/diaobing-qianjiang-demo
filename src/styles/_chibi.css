@@ -1,25 +1,26 @@
-/* 貂蝉人物立绘 — Q版大头身 */
+/* 貂蝉人物立绘 — Q版大头身美化版 */
 .diaochan-figure {
   position: relative;
-  width: 32px;
-  height: 44px;
+  width: 36px;
+  height: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  margin-bottom: 1px;
+  margin-bottom: 0;
+  z-index: 5;
 }
 
 /* 情绪气泡 */
 .diaochan-bubble {
   position: absolute;
-  top: -28px;
+  top: -26px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20;
+  z-index: 25;
   padding: 3px 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(200, 160, 100, 0.5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
@@ -36,7 +37,7 @@
   height: 0;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 5px solid rgba(255, 255, 255, 0.92);
+  border-top: 5px solid rgba(255, 255, 255, 0.95);
 }
 
 .diaochan-bubble span {
@@ -54,11 +55,11 @@
 /* 貂蝉头顶血条 */
 .diaochan-hp-bar {
   position: absolute;
-  top: -6px;
+  top: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 26px;
-  z-index: 10;
+  width: 28px;
+  z-index: 15;
 }
 
 .diaochan-hp-track {
@@ -86,90 +87,90 @@
   animation: hp-critical-blink 0.6s ease-in-out infinite;
 }
 
-/* Q版貂蝉形象 */
+/* Q版貂蝉形象 — 整体容器 */
 .diaochan-chibi {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-/* Q版头部：1:1 大头比例 */
+/* ========== 头部区域（占整体60%） ========== */
 .chibi-head {
   position: absolute;
-  top: 2px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   z-index: 3;
 }
 
-/* 后发 */
+/* 后发 — 长发飘逸 */
 .chibi-hair-back {
   position: absolute;
-  top: -2px;
+  top: -1px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
-  height: 18px;
-  border-radius: 50% 50% 45% 45%;
-  background: linear-gradient(180deg, #2a1a3a, #1a1028);
+  width: 28px;
+  height: 22px;
+  border-radius: 50% 50% 48% 48%;
+  background: linear-gradient(180deg, #3a2848, #241830);
 }
 
-/* 脸部 */
+/* 脸部 — 更圆润可爱 */
 .chibi-face {
   position: absolute;
-  top: 3px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 18px;
-  height: 16px;
+  width: 20px;
+  height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 45%, #ffe8d8, #f5d0b0);
-  box-shadow: 0 0 4px rgba(255, 200, 160, 0.3);
+  background: radial-gradient(circle at 50% 42%, #fff0e0, #f5d5b8);
+  box-shadow: 0 0 5px rgba(255, 200, 160, 0.4);
 }
 
-/* 眼睛 */
+/* 眼睛 — 更大更萌 */
 .chibi-eyes {
   position: absolute;
-  top: 5px;
+  top: 7px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .chibi-eyes .eye-left,
 .chibi-eyes .eye-right {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #3a2a1a;
+  background: #2a1a10;
   position: relative;
 }
 
-/* 眼睛高光 */
+/* 眼睛高光 — 闪亮感 */
 .chibi-eyes .eye-left::after,
 .chibi-eyes .eye-right::after {
   content: '';
   position: absolute;
   top: 1px;
   right: 1px;
-  width: 1.5px;
-  height: 1.5px;
+  width: 2px;
+  height: 2px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* 情绪：worry 担忧 — 眼睛变成> < */
+/* 情绪：worry/panic — 眼睛变成> < */
 .chibi-eyes.mood-worry .eye-left,
 .chibi-eyes.mood-panic .eye-left {
   width: 5px;
   height: 3px;
   border-radius: 0;
   background: transparent;
-  border-bottom: 2px solid #3a2a1a;
+  border-bottom: 2px solid #2a1a10;
   transform: rotate(15deg);
 }
 
@@ -179,105 +180,118 @@
   height: 3px;
   border-radius: 0;
   background: transparent;
-  border-bottom: 2px solid #3a2a1a;
+  border-bottom: 2px solid #2a1a10;
   transform: rotate(-15deg);
 }
 
-/* 情绪：celebrate 庆祝 — 眼睛变成弯月 */
+/* 情绪：celebrate — 眼睛变成弯月 */
 .chibi-eyes.mood-celebrate .eye-left,
 .chibi-eyes.mood-celebrate .eye-right {
   width: 5px;
   height: 3px;
   border-radius: 0;
   background: transparent;
-  border-top: 2px solid #3a2a1a;
+  border-top: 2px solid #2a1a10;
 }
 
-/* 嘴巴 */
+/* 嘴巴 — 更可爱 */
 .chibi-mouth {
   position: absolute;
-  bottom: 3px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
   width: 5px;
-  height: 2px;
-  border-radius: 0 0 50% 50%;
-  background: #c06070;
-}
-
-/* 情绪：cheer 开心 — 嘴巴变大 */
-.chibi-mouth.mood-cheer,
-.chibi-mouth.mood-celebrate {
-  width: 7px;
-  height: 4px;
+  height: 2.5px;
   border-radius: 0 0 50% 50%;
   background: #d07080;
 }
 
-/* 情绪：worry 担忧 — 嘴巴变成小o */
+/* 情绪：cheer/celebrate — 开心大笑 */
+.chibi-mouth.mood-cheer,
+.chibi-mouth.mood-celebrate {
+  width: 8px;
+  height: 5px;
+  border-radius: 0 0 50% 50%;
+  background: #e08090;
+}
+
+/* 情绪：worry — 担忧小o */
 .chibi-mouth.mood-worry {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: #c06070;
+  background: #d07080;
 }
 
-/* 情绪：panic 惊慌 — 嘴巴变成波浪 */
+/* 情绪：panic — 惊慌波浪 */
 .chibi-mouth.mood-panic {
   width: 6px;
   height: 3px;
   border-radius: 50%;
-  border: 1px solid #c06070;
+  border: 1.5px solid #d07080;
   background: transparent;
   border-top-color: transparent;
   border-left-color: transparent;
   border-right-color: transparent;
 }
 
-/* 腮红 */
+/* 腮红 — 更明显 */
 .chibi-blush {
   position: absolute;
-  top: 9px;
+  top: 11px;
   left: 1px;
-  width: 4px;
-  height: 2px;
+  width: 5px;
+  height: 3px;
   border-radius: 50%;
-  background: rgba(255, 140, 140, 0.35);
-  box-shadow: 12px 0 0 rgba(255, 140, 140, 0.35);
+  background: rgba(255, 130, 140, 0.45);
+  box-shadow: 13px 0 0 rgba(255, 130, 140, 0.45);
 }
 
-/* 前发 */
+/* 前发 — 刘海 */
 .chibi-hair-front {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 8px;
+  width: 22px;
+  height: 9px;
   border-radius: 50% 50% 0 0;
-  background: linear-gradient(180deg, #3a2a4a, #2a1a3a);
+  background: linear-gradient(180deg, #4a3458, #3a2848);
 }
 
-/* 发饰 */
+/* 发饰 — 金色花钿 */
 .chibi-hair-ornament {
   position: absolute;
   top: -1px;
-  right: 2px;
-  width: 5px;
-  height: 5px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffd700, #e6b800);
-  box-shadow: 0 0 3px rgba(255, 200, 50, 0.5);
+  background: radial-gradient(circle, #ffe066, #e6b800);
+  box-shadow: 0 0 4px rgba(255, 200, 50, 0.6);
 }
 
-/* Q版身体 */
+/* ========== 身体区域（占整体40%，紧贴头部） ========== */
 .chibi-body {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 16px;
-  height: 18px;
+  width: 18px;
+  height: 20px;
+  z-index: 2;
+}
+
+/* 脖子 — 连接头部和身体 */
+.chibi-neck {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 4px;
+  background: linear-gradient(180deg, #f5d0b0, #e8c4a8);
+  border-radius: 0 0 50% 50%;
 }
 
 /* 衣服 */
@@ -287,24 +301,36 @@
   left: 0;
   right: 0;
   height: 100%;
-  border-radius: 40% 40% 0 0;
+  border-radius: 45% 45% 0 0;
   background: linear-gradient(180deg,
-    rgba(200, 70, 100, 0.9) 0%,
-    rgba(160, 50, 80, 0.85) 50%,
-    rgba(120, 40, 70, 0.8) 100%
+    rgba(210, 80, 120, 0.92) 0%,
+    rgba(170, 60, 95, 0.88) 40%,
+    rgba(130, 45, 75, 0.85) 100%
   );
   box-shadow:
-    inset 0 1px 2px rgba(255, 180, 200, 0.3),
-    0 0 5px rgba(200, 80, 120, 0.2);
+    inset 0 1px 3px rgba(255, 190, 210, 0.35),
+    0 0 6px rgba(210, 90, 130, 0.25);
+}
+
+/* 衣领 */
+.chibi-collar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 5px;
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, rgba(255, 220, 200, 0.6), rgba(240, 200, 170, 0.4));
 }
 
 /* 袖子 */
 .chibi-sleeves {
   position: absolute;
-  top: 0;
-  left: -3px;
-  right: -3px;
-  height: 8px;
+  top: 2px;
+  left: -4px;
+  right: -4px;
+  height: 10px;
 }
 
 .chibi-sleeves::before,
@@ -312,10 +338,10 @@
   content: '';
   position: absolute;
   top: 0;
-  width: 8px;
-  height: 10px;
+  width: 9px;
+  height: 11px;
   border-radius: 50%;
-  background: linear-gradient(180deg, rgba(200, 70, 100, 0.85), rgba(160, 50, 80, 0.8));
+  background: linear-gradient(180deg, rgba(210, 80, 120, 0.88), rgba(170, 60, 95, 0.82));
 }
 
 .chibi-sleeves::before { left: 0; }
@@ -324,10 +350,10 @@
 /* 手臂 */
 .chibi-arms {
   position: absolute;
-  top: 2px;
+  top: 3px;
   left: 0;
   right: 0;
-  height: 10px;
+  height: 12px;
 }
 
 /* 默认姿势：自然下垂 */
@@ -336,47 +362,58 @@
   content: '';
   position: absolute;
   top: 0;
-  width: 3px;
-  height: 10px;
+  width: 3.5px;
+  height: 11px;
   border-radius: 50%;
   background: linear-gradient(180deg, #f5d0b0, #e8c4a8);
 }
 
-.chibi-arms::before { left: -1px; transform: rotate(-10deg); }
-.chibi-arms::after { right: -1px; transform: rotate(10deg); }
+.chibi-arms::before { left: -1px; transform: rotate(-8deg); }
+.chibi-arms::after { right: -1px; transform: rotate(8deg); }
 
 /* 情绪：cheer/celebrate — 举手欢呼 */
 .chibi-arms.mood-cheer::before,
 .chibi-arms.mood-celebrate::before {
-  transform: rotate(-45deg) translateY(-4px);
-  height: 12px;
+  transform: rotate(-50deg) translateY(-5px);
+  height: 13px;
 }
 
 .chibi-arms.mood-cheer::after,
 .chibi-arms.mood-celebrate::after {
-  transform: rotate(45deg) translateY(-4px);
-  height: 12px;
+  transform: rotate(50deg) translateY(-5px);
+  height: 13px;
 }
 
-/* 情绪：worry/panic — 抱头/紧张 */
+/* 情绪：worry/panic — 抱头紧张 */
 .chibi-arms.mood-worry::before,
 .chibi-arms.mood-panic::before {
-  transform: rotate(30deg) translateY(-2px);
-  height: 8px;
+  transform: rotate(35deg) translateY(-3px);
+  height: 9px;
 }
 
 .chibi-arms.mood-worry::after,
 .chibi-arms.mood-panic::after {
-  transform: rotate(-30deg) translateY(-2px);
-  height: 8px;
+  transform: rotate(-35deg) translateY(-3px);
+  height: 9px;
 }
 
-/* 貂蝉危险状态 */
+/* 腰带装饰 */
+.chibi-sash {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, #e6c050, #f8e070, #e6c050);
+  box-shadow: 0 0 4px rgba(255, 210, 100, 0.4);
+}
+
+/* 貂蝉危险状态 — 衣服变红 */
 .diaochan-figure.is-danger .chibi-dress {
   background: linear-gradient(180deg,
-    rgba(220, 60, 90, 0.9) 0%,
-    rgba(180, 50, 70, 0.85) 50%,
-    rgba(140, 40, 60, 0.8) 100%
+    rgba(230, 60, 90, 0.92) 0%,
+    rgba(190, 45, 70, 0.88) 40%,
+    rgba(150, 35, 55, 0.85) 100%
   );
 }
 
@@ -386,16 +423,16 @@
 
 .diaochan-figure.is-critical .chibi-dress {
   background: linear-gradient(180deg,
-    rgba(240, 40, 70, 0.95) 0%,
-    rgba(200, 30, 50, 0.9) 50%,
-    rgba(160, 20, 40, 0.85) 100%
+    rgba(250, 40, 70, 0.95) 0%,
+    rgba(210, 30, 50, 0.92) 40%,
+    rgba(170, 25, 40, 0.88) 100%
   );
 }
 
 @keyframes chibi-shake {
   0%, 100% { transform: translateX(0) rotate(0); }
-  25% { transform: translateX(-1px) rotate(-1deg); }
-  75% { transform: translateX(1px) rotate(1deg); }
+  25% { transform: translateX(-1.5px) rotate(-1.5deg); }
+  75% { transform: translateX(1.5px) rotate(1.5deg); }
 }
 
 /* 血条闪烁动画 */
