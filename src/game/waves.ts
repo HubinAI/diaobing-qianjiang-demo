@@ -89,51 +89,56 @@ function buildWave(spec: WaveSpec): WaveConfig {
 }
 
 // ============================================================
-// 三套波次表 —— 波浪式情绪曲线
+// 三套波次表 —— 波浪式情绪曲线（难度增强版）
 //
 // 节奏设计原则：
-//   波次 1-2：教学波（简单，建立信心）
-//   波次 3：  首次"哇塞"——快速敌人冲击，制造紧张感
-//   波次 4：  喘息波（回落，给玩家调整空间）
-//   波次 5-6：压力攀升（重甲 + 快速混编）
-//   波次 7：  暴风雨前的宁静（全重甲）
-//   波次 8：  Boss 决战（Boss + 护卫 fast 敌人）
+//   波次 1-2：教学波（建立基础防线）
+//   波次 3：  首次冲击——快速敌人潮，检验防线宽度
+//   波次 4：  短暂喘息（带重甲初现）
+//   波次 5-6：压力持续攀升（重甲+快速混编）
+//   波次 7：  暴风雨前奏（全重甲 + 快速护卫）
+//   波次 8：  Boss 决战（Boss + 大量快速护卫）
+//
+// 改动要点：
+//   - 总敌人数提升 30-50%，单局时长从 ~4min → ~6-8min
+//   - spawn 间隔缩短，敌人更密集，防线压力更大
+//   - 重甲和快速敌人在更早波次出现
 // ============================================================
 
-// ---- 标准模式（类似原版，调整为波浪式节奏）----
+// ---- 标准模式 ----
 const standardWaves: WaveSpec[] = [
-  { index: 1, duration: 26, spawnInterval: 1.5, totalEnemies: 14 },
-  { index: 2, duration: 28, spawnInterval: 1.3, totalEnemies: 18 },
-  { index: 3, duration: 30, spawnInterval: 0.9, totalEnemies: 28, fastRatio: 0.35 },           // 首次冲击
-  { index: 4, duration: 32, spawnInterval: 1.2, totalEnemies: 20 },                              // 喘息
-  { index: 5, duration: 36, spawnInterval: 0.9, totalEnemies: 34, fastRatio: 0.2, heavyRatio: 0.2 },  // 压力攀升
-  { index: 6, duration: 38, spawnInterval: 0.78, totalEnemies: 40, fastRatio: 0.25, heavyRatio: 0.25 }, // 持续施压
-  { index: 7, duration: 40, spawnInterval: 0.9, totalEnemies: 30, heavyRatio: 0.45 },            // 全重甲
-  { index: 8, duration: 50, spawnInterval: 0.85, totalEnemies: 36, fastRatio: 0.15, heavyRatio: 0.2, bossCount: 1, bossAt: 14 },
+  { index: 1, duration: 28, spawnInterval: 1.2, totalEnemies: 20 },
+  { index: 2, duration: 30, spawnInterval: 1.0, totalEnemies: 26, fastRatio: 0.1 },
+  { index: 3, duration: 30, spawnInterval: 0.72, totalEnemies: 36, fastRatio: 0.4 },            // 快速冲击
+  { index: 4, duration: 32, spawnInterval: 1.0, totalEnemies: 26, heavyRatio: 0.12 },            // 喘息+重甲初现
+  { index: 5, duration: 36, spawnInterval: 0.72, totalEnemies: 44, fastRatio: 0.22, heavyRatio: 0.22 }, // 压力攀升
+  { index: 6, duration: 38, spawnInterval: 0.62, totalEnemies: 52, fastRatio: 0.28, heavyRatio: 0.28 }, // 持续高压
+  { index: 7, duration: 40, spawnInterval: 0.72, totalEnemies: 40, heavyRatio: 0.5, fastRatio: 0.1 }, // 重甲阵+快速护卫
+  { index: 8, duration: 54, spawnInterval: 0.68, totalEnemies: 48, fastRatio: 0.15, heavyRatio: 0.25, bossCount: 1, bossAt: 12 },
 ]
 
-// ---- 简单模式（适合新手 / 教学局）----
+// ---- 简单模式 ----
 const easyWaves: WaveSpec[] = [
-  { index: 1, duration: 30, spawnInterval: 1.8, totalEnemies: 12 },
-  { index: 2, duration: 32, spawnInterval: 1.5, totalEnemies: 16 },
-  { index: 3, duration: 34, spawnInterval: 1.1, totalEnemies: 22, fastRatio: 0.25 },             // 首次冲击（弱化）
-  { index: 4, duration: 36, spawnInterval: 1.4, totalEnemies: 18 },                              // 喘息
-  { index: 5, duration: 38, spawnInterval: 1.0, totalEnemies: 28, fastRatio: 0.15, heavyRatio: 0.1 },
-  { index: 6, duration: 40, spawnInterval: 0.9, totalEnemies: 32, fastRatio: 0.2, heavyRatio: 0.15 },
-  { index: 7, duration: 42, spawnInterval: 1.0, totalEnemies: 24, heavyRatio: 0.35 },
-  { index: 8, duration: 52, spawnInterval: 0.95, totalEnemies: 30, fastRatio: 0.1, heavyRatio: 0.15, bossCount: 1, bossAt: 16 },
+  { index: 1, duration: 32, spawnInterval: 1.5, totalEnemies: 16 },
+  { index: 2, duration: 34, spawnInterval: 1.2, totalEnemies: 22 },
+  { index: 3, duration: 34, spawnInterval: 0.9, totalEnemies: 28, fastRatio: 0.3 },              // 首次冲击（弱化）
+  { index: 4, duration: 36, spawnInterval: 1.2, totalEnemies: 22, heavyRatio: 0.08 },             // 喘息
+  { index: 5, duration: 38, spawnInterval: 0.85, totalEnemies: 36, fastRatio: 0.18, heavyRatio: 0.14 },
+  { index: 6, duration: 40, spawnInterval: 0.75, totalEnemies: 42, fastRatio: 0.22, heavyRatio: 0.18 },
+  { index: 7, duration: 42, spawnInterval: 0.85, totalEnemies: 32, heavyRatio: 0.4 },             // 重甲阵
+  { index: 8, duration: 56, spawnInterval: 0.78, totalEnemies: 38, fastRatio: 0.12, heavyRatio: 0.18, bossCount: 1, bossAt: 14 },
 ]
 
-// ---- 困难模式（适合策略玩家挑战）----
+// ---- 困难模式 ----
 const hardWaves: WaveSpec[] = [
-  { index: 1, duration: 24, spawnInterval: 1.2, totalEnemies: 18 },
-  { index: 2, duration: 28, spawnInterval: 1.0, totalEnemies: 24, fastRatio: 0.15 },
-  { index: 3, duration: 28, spawnInterval: 0.75, totalEnemies: 34, fastRatio: 0.4 },             // 冲击波（强化）
-  { index: 4, duration: 30, spawnInterval: 1.0, totalEnemies: 22, heavyRatio: 0.15 },             // 喘息（但带重甲）
-  { index: 5, duration: 34, spawnInterval: 0.75, totalEnemies: 40, fastRatio: 0.25, heavyRatio: 0.25 },
-  { index: 6, duration: 36, spawnInterval: 0.68, totalEnemies: 48, fastRatio: 0.3, heavyRatio: 0.3 },
-  { index: 7, duration: 38, spawnInterval: 0.78, totalEnemies: 36, heavyRatio: 0.5 },             // 全重甲地狱
-  { index: 8, duration: 48, spawnInterval: 0.72, totalEnemies: 42, fastRatio: 0.2, heavyRatio: 0.25, bossCount: 1, bossAt: 10 },
+  { index: 1, duration: 24, spawnInterval: 1.0, totalEnemies: 24, fastRatio: 0.05 },
+  { index: 2, duration: 28, spawnInterval: 0.82, totalEnemies: 32, fastRatio: 0.18 },
+  { index: 3, duration: 28, spawnInterval: 0.58, totalEnemies: 44, fastRatio: 0.45 },             // 快速地狱
+  { index: 4, duration: 30, spawnInterval: 0.85, totalEnemies: 30, heavyRatio: 0.18 },             // 喘息+重甲
+  { index: 5, duration: 34, spawnInterval: 0.6, totalEnemies: 52, fastRatio: 0.28, heavyRatio: 0.28 },
+  { index: 6, duration: 36, spawnInterval: 0.5, totalEnemies: 62, fastRatio: 0.32, heavyRatio: 0.32 },
+  { index: 7, duration: 38, spawnInterval: 0.6, totalEnemies: 48, heavyRatio: 0.55, fastRatio: 0.12 }, // 重甲地狱
+  { index: 8, duration: 52, spawnInterval: 0.52, totalEnemies: 56, fastRatio: 0.2, heavyRatio: 0.3, bossCount: 1, bossAt: 10 },
 ]
 
 // ---- 导出 ----

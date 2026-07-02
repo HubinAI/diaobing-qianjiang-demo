@@ -2,8 +2,8 @@ import type { AttackShape, EnemyType, GeneralId, LaneId, TroopType, WeaponId } f
 
 export const gameConfig = {
   guardianMaxHp: 100,
-  initialCoins: 30,
-  coinRegenPerSecond: 1.2,
+  initialCoins: 40,
+  coinRegenPerSecond: 1.5,
   normalEnemyCoinReward: 2,
   eliteEnemyCoinReward: 5,
   bossCoinReward: 30,
@@ -38,10 +38,10 @@ export const gameConfig = {
   },
   attackEventLingerSeconds: 0.35,
   coinFlySeconds: 0.55,
-  enemyHpMultiplierPerWave: 0.28,
-  enemySpeedMultiplierPerWave: 0.025,
-  enemyGateDamageMultiplierPerWave: 0.12,
-  bossHpMultiplier: 1.6,
+  enemyHpMultiplierPerWave: 0.35,
+  enemySpeedMultiplierPerWave: 0.04,
+  enemyGateDamageMultiplierPerWave: 0.15,
+  bossHpMultiplier: 2.0,
   starMultiplier: {
     1: 1,
     2: 1.72,
@@ -265,10 +265,10 @@ export const enemyConfig: Record<
   EnemyType,
   { label: string; hp: number; speed: number; gateDamage: number; coinReward: number; icon: string }
 > = {
-  normal: { label: '步卒', hp: 65, speed: 0.036, gateDamage: 4, coinReward: 2, icon: '卒' },
-  fast: { label: '轻骑', hp: 48, speed: 0.062, gateDamage: 3, coinReward: 2, icon: '骑' },
-  heavy: { label: '重甲', hp: 180, speed: 0.026, gateDamage: 9, coinReward: 5, icon: '甲' },
-  boss: { label: 'Boss', hp: 1800, speed: 0.018, gateDamage: 35, coinReward: 30, icon: '将' },
+  normal: { label: '步卒', hp: 78, speed: 0.038, gateDamage: 5, coinReward: 2, icon: '卒' },
+  fast: { label: '轻骑', hp: 55, speed: 0.068, gateDamage: 4, coinReward: 2, icon: '骑' },
+  heavy: { label: '重甲', hp: 220, speed: 0.028, gateDamage: 12, coinReward: 5, icon: '甲' },
+  boss: { label: 'Boss', hp: 2400, speed: 0.020, gateDamage: 45, coinReward: 30, icon: '将' },
 }
 
 export function getRecruitCost(batchIndex: number) {
