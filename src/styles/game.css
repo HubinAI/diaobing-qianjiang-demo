@@ -528,14 +528,15 @@ button {
   height: 27px;
   display: grid;
   place-items: center;
-  margin-left: -13px;
+  margin-left: -13.5px;
+  margin-top: -13.5px;
   border: 1px solid rgba(255, 216, 137, 0.76);
   border-radius: 50%;
   color: #fff5d6;
   background: linear-gradient(180deg, #4d1d16, #140807);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.56), 0 0 10px rgba(210, 62, 42, 0.18);
-  transform: translateX(-50%);
-  will-change: left, top, transform;
+  transform: none;
+  will-change: left, top;
   transition: none;
   animation: enemyPress 900ms ease-in-out infinite alternate;
 }
