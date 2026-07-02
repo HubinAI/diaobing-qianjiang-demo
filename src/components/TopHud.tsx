@@ -1,4 +1,4 @@
-import { duelConfig, gameConfig } from '../config/gameConfig'
+import { duelConfig, gameConfig, APP_VERSION } from '../config/gameConfig'
 import type { DuelGameState } from '../types/game'
 
 interface TopHudProps {
@@ -43,6 +43,7 @@ export function TopHud({ state }: TopHudProps) {
         {countdown && <span className="wave-alert">{countdown}</span>}
       </div>
       <div className="hud-wave">
+        <span className="version-label">{APP_VERSION}</span>
         <span className="wave-badge" data-testid="wave-counter" data-value={state.player.waveIndex}>
           第{state.player.waveIndex}/{totalWaves}波
         </span>
