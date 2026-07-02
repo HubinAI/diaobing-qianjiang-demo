@@ -128,17 +128,17 @@ export function GuardianGate({ state }: GuardianGateProps) {
                   <div className={`chibi-arms mood-${mood}`} />
                 </div>
               </div>
-              {/* 血量条 — 移到貂蝉下方 */}
-              <div className="diaochan-hp-bar">
-                <div className="diaochan-hp-text">
-                  <span>{Math.ceil(playerHp)}%</span>
-                </div>
-                <div className="diaochan-hp-track">
-                  <div
-                    className={`diaochan-hp-fill ${hpColorClass}`}
-                    style={{ width: `${playerHp}%` }}
-                  />
-                </div>
+            </div>
+            {/* 血量条 — 移到貂蝉外部，避免被transform影响 */}
+            <div className="diaochan-hp-bar">
+              <div className="diaochan-hp-text">
+                <span>{Math.ceil(playerHp)}%</span>
+              </div>
+              <div className="diaochan-hp-track">
+                <div
+                  className={`diaochan-hp-fill ${hpColorClass}`}
+                  style={{ width: `${playerHp}%` }}
+                />
               </div>
             </div>
           </div>

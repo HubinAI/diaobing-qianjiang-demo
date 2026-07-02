@@ -73,7 +73,7 @@
 /* 貂蝉血条 — 移到身体下方，简洁进度条 */
 .diaochan-hp-bar {
   position: absolute;
-  bottom: -24px;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
   width: 36px;
