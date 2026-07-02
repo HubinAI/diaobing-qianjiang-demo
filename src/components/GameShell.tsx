@@ -7,6 +7,7 @@ import { Battlefield } from './Battlefield'
 import { CompendiumModal } from './CompendiumModal'
 import { DebugPanel } from './DebugPanel'
 import { GuardianGate } from './GuardianGate'
+import { MatchmakingOverlay } from './MatchmakingOverlay'
 import { RecruitButton } from './RecruitButton'
 import { ReserveBar } from './ReserveBar'
 import { ResultModal } from './ResultModal'
@@ -36,6 +37,7 @@ export function GameShell({ state, dispatch }: GameShellProps) {
 
   const [tutorialStep, setTutorialStep] = useState(-1)
   const [tutorialDone, setTutorialDone] = useState(false)
+  const [matchmaking, setMatchmaking] = useState(false)
   const prevPhaseRef = useRef(state.phase)
   const recruitBtnRef = useRef<HTMLButtonElement>(null)
   const reserveRef = useRef<HTMLDivElement>(null)
@@ -243,16 +245,25 @@ export function GameShell({ state, dispatch }: GameShellProps) {
           <AudioManager state={state.player} />
         </footer>
         <DebugPanel state={state} dispatch={dispatch} onToggle={() => dispatch({ type: 'toggleDebug' })} />
-        {state.phase === 'idle' && (
+        {state.phase === 'idle' && !matchmaking && (
           <div className="start-overlay">
             <div className="start-intro">
               <h1>调兵遣将</h1>
               <p>招募士兵 · 部署防线 · 保护貂蝉 · 击败对手</p>
             </div>
-            <button data-testid="start-game" className="start-game-button" type="button" onClick={() => dispatch({ type: 'start' })}>
+            <button data-testid="start-game" className="start-game-button" type="button" onClick={() => setMatchmaking(true)}>
               开始竞速
             </button>
           </div>
+        )}
+        {matchmaking && (
+          <MatchmakingOverlay
+            targetDifficulty={state.ghostDifficulty}
+            onComplete={() => {
+              setMatchmaking(false)
+              dispatch({ type: 'start' })
+            }}
+          />
         )}
         {state.pendingRecruitConfirmationSide === 'player' && (
           <div className="modal-backdrop compact-modal" role="dialog" aria-modal="true">

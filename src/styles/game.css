@@ -2544,3 +2544,144 @@ button {
   transform: scale(1.03);
   box-shadow: 0 4px 20px rgba(246, 210, 123, 0.4);
 }
+
+/* ============================================================
+   匹配对手动画
+   ============================================================ */
+
+.matchmaking-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+}
+
+.matchmaking-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 6, 6, 0.92);
+  animation: mm-fade-in 0.3s ease-out;
+}
+
+@keyframes mm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.matchmaking-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.matchmaking-label {
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.matchmaking-label.matchmaking-found {
+  color: #f6d27b;
+  animation: mm-label-glow 0.4s ease-in-out;
+}
+
+.matchmaking-label.matchmaking-ready {
+  color: #2ecc71;
+}
+
+@keyframes mm-label-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.matchmaking-card {
+  width: 160px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(10, 14, 16, 0.95);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.matchmaking-card.is-selected {
+  border-color: #f6d27b;
+  box-shadow: 0 0 24px rgba(246, 210, 123, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5);
+  transform: scale(1.08);
+  animation: mm-card-pulse 0.6s ease-in-out 3;
+}
+
+@keyframes mm-card-pulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(246, 210, 123, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(246, 210, 123, 0.55), 0 8px 40px rgba(0, 0, 0, 0.6); }
+}
+
+.matchmaking-card.is-flying {
+  animation: mm-card-shrink 0.6s ease-in forwards;
+}
+
+@keyframes mm-card-shrink {
+  0% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+
+.matchmaking-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.matchmaking-card strong {
+  font-size: 18px;
+  font-weight: 950;
+  color: #e8d5b7;
+}
+
+/* 飞行残影 */
+.matchmaking-fly-ghost {
+  position: fixed;
+  z-index: 200;
+  left: var(--fly-start-x);
+  top: var(--fly-start-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translate(-50%, -50%) scale(0.3);
+  animation: mm-fly-to-target 0.65s ease-in forwards;
+  pointer-events: none;
+}
+
+.matchmaking-fly-ghost span {
+  font-size: 24px;
+}
+
+.matchmaking-fly-ghost strong {
+  font-size: 10px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+@keyframes mm-fly-to-target {
+  0% {
+    left: var(--fly-start-x);
+    top: var(--fly-start-y);
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    left: var(--fly-end-x);
+    top: var(--fly-end-y);
+    transform: translate(-50%, -50%) scale(0.15);
+    opacity: 0;
+  }
+}
