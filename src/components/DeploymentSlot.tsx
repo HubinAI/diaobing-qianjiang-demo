@@ -79,7 +79,7 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
           <span className="slot-ground" aria-hidden="true" />
         )
       ) : (
-        <span className="slot-lock" aria-hidden="true" />
+        <span className="slot-lock" aria-hidden="true">🔒</span>
       )}
     </div>
   )
