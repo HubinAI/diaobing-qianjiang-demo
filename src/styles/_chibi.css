@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: flex-end;
   margin-bottom: 0;
-  z-index: 5;
+  z-index: 10;
 }
 
 /* 情绪气泡 — 移到貂蝉右侧，淡入淡出 */
@@ -68,98 +68,64 @@
   100% { opacity: 1; transform: scale(1) translateX(0); }
 }
 
-/* 貂蝉血条 — 移到身体下方 */
+/* 貂蝉血条 — 移到身体下方，简洁进度条 */
 .diaochan-hp-bar {
   position: absolute;
-  bottom: -8px;
+  bottom: -14px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
+  width: 32px;
   z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
 }
 
-/* 蝴蝶结发带主体 */
+/* 血量百分比文字 */
+.diaochan-hp-text {
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(220, 200, 160, 0.9);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+
+/* 血量轨道 — 简洁圆角条 */
 .diaochan-hp-track {
-  position: relative;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #ffb6c1, #ff91a4);
-  border: 1px solid rgba(255, 150, 170, 0.6);
-  box-shadow: 0 1px 3px rgba(255, 100, 130, 0.3);
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(40, 30, 20, 0.8);
+  border: 1px solid rgba(120, 90, 50, 0.4);
   overflow: hidden;
 }
 
-/* 蝴蝶结左翅膀 */
-.diaochan-hp-track::before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 8px;
-  border-radius: 50% 0 0 50%;
-  background: linear-gradient(180deg, #ffb6c1, #ff91a4);
-  border: 1px solid rgba(255, 150, 170, 0.5);
-}
-
-/* 蝴蝶结右翅膀 */
-.diaochan-hp-track::after {
-  content: '';
-  position: absolute;
-  right: -4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 8px;
-  border-radius: 0 50% 50% 0;
-  background: linear-gradient(180deg, #ffb6c1, #ff91a4);
-  border: 1px solid rgba(255, 150, 170, 0.5);
-}
-
-/* 血量填充 — 从中间向两边展开 */
+/* 血量填充 — 根据百分比变色 */
 .diaochan-hp-fill {
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: linear-gradient(90deg, #ff6b9d, #ffc2d1);
-  transition: width 200ms ease;
-  position: relative;
-  z-index: 2;
+  transition: width 200ms ease, background 300ms ease;
 }
 
-/* 血量危险 — 蝴蝶结变橙色 */
-.diaochan-hp-fill.hp-danger {
-  background: linear-gradient(90deg, #ff8c42, #ffd4a3);
+/* 绿色 — 血量 70% 以上 */
+.diaochan-hp-fill.hp-green {
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.3);
 }
 
-.diaochan-hp-track.hp-danger {
-  background: linear-gradient(180deg, #ffd4a3, #ffb347);
-  border-color: rgba(255, 160, 80, 0.6);
+/* 黄色 — 血量 30%-70% */
+.diaochan-hp-fill.hp-yellow {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  box-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
 }
 
-.diaochan-hp-track.hp-danger::before,
-.diaochan-hp-track.hp-danger::after {
-  background: linear-gradient(180deg, #ffd4a3, #ffb347);
-  border-color: rgba(255, 160, 80, 0.5);
-}
-
-/* 血量危急 — 蝴蝶结变红色闪烁 */
-.diaochan-hp-fill.hp-critical {
-  background: linear-gradient(90deg, #ff4757, #ff6b7a);
+/* 红色 — 血量 30% 以下 */
+.diaochan-hp-fill.hp-red {
+  background: linear-gradient(90deg, #f87171, #ef4444);
+  box-shadow: 0 0 4px rgba(248, 113, 113, 0.3);
   animation: hp-critical-blink 0.6s ease-in-out infinite;
-}
-
-.diaochan-hp-track.hp-critical {
-  background: linear-gradient(180deg, #ff6b7a, #ff4757);
-  border-color: rgba(255, 60, 70, 0.7);
-  animation: hp-critical-blink 0.6s ease-in-out infinite;
-}
-
-.diaochan-hp-track.hp-critical::before,
-.diaochan-hp-track.hp-critical::after {
-  background: linear-gradient(180deg, #ff6b7a, #ff4757);
-  border-color: rgba(255, 60, 70, 0.6);
 }
 
 /* Q版貂蝉形象 — 整体容器 */

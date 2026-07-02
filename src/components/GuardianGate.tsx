@@ -48,10 +48,18 @@ function getDiaochanMood(hpPercent: number, phase: string, elapsedSeconds: numbe
 
 export function GuardianGate({ state }: GuardianGateProps) {
   const playerHp = hpPercent(state.player.guardianHp)
-  const isCritical = playerHp <= 20
-  const isDanger = playerHp <= 40 && playerHp > 20
+  const isCritical = playerHp <= 30
+  const isDanger = playerHp <= 70 && playerHp > 30
   const totalWaves = state.player.waveTable.length
   const { mood, bubble } = getDiaochanMood(playerHp, state.phase, state.elapsedSeconds, state.player.waveIndex, totalWaves)
+
+  // 根据血量计算颜色
+  let hpColorClass = 'hp-green'
+  if (playerHp <= 30) {
+    hpColorClass = 'hp-red'
+  } else if (playerHp <= 70) {
+    hpColorClass = 'hp-yellow'
+  }
 
   return (
     <section
@@ -61,11 +69,9 @@ export function GuardianGate({ state }: GuardianGateProps) {
     >
       {/* 城墙背景 + 貂蝉立绘 + 血条融合 */}
       <div className="gate-wall">
-        {/* 城门楼屋顶 + 血量百分比 */}
+        {/* 城门楼屋顶 — 移除血量百分比 */}
         <div className="gate-roof">
-          <div className="gate-roof-top">
-            <span className="diaochan-hp-badge" data-testid="player-guardian-hp">{Math.ceil(playerHp)}%</span>
-          </div>
+          <div className="gate-roof-top" />
           <div className="gate-roof-eaves" />
         </div>
         {/* 城墙主体 */}
@@ -88,15 +94,6 @@ export function GuardianGate({ state }: GuardianGateProps) {
                   <span>{bubble}</span>
                 </div>
               )}
-              {/* 头顶血条 — 蝴蝶结发带 */}
-              <div className="diaochan-hp-bar">
-                <div className={`diaochan-hp-track ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}>
-                  <div
-                    className={`diaochan-hp-fill ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}
-                    style={{ width: `${playerHp}%` }}
-                  />
-                </div>
-              </div>
               {/* Q版貂蝉形象 */}
               <div className="diaochan-chibi">
                 {/* 头部：Q版大头 */}
@@ -126,6 +123,18 @@ export function GuardianGate({ state }: GuardianGateProps) {
                   <div className="chibi-sleeves" />
                   {/* 手臂：根据情绪变化姿势 */}
                   <div className={`chibi-arms mood-${mood}`} />
+                </div>
+              </div>
+              {/* 血量条 — 移到貂蝉下方 */}
+              <div className="diaochan-hp-bar">
+                <div className="diaochan-hp-text">
+                  <span>{Math.ceil(playerHp)}%</span>
+                </div>
+                <div className="diaochan-hp-track">
+                  <div
+                    className={`diaochan-hp-fill ${hpColorClass}`}
+                    style={{ width: `${playerHp}%` }}
+                  />
                 </div>
               </div>
             </div>

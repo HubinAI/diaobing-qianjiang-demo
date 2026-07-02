@@ -1,6 +1,6 @@
 import type { AttackShape, EnemyType, GeneralId, LaneId, TroopType, WeaponId } from '../types/game'
 
-export const APP_VERSION = 'V0702019'
+export const APP_VERSION = 'V0702020'
 
 export const gameConfig = {
   guardianMaxHp: 100,
