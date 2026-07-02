@@ -113,13 +113,13 @@ describe('round 5 ghost duel core', () => {
     const playerSlots = createInitialSlots('player')
     const ghostSlots = createInitialSlots('ghost')
     expect(slotLayoutVersion).toBe(3)
-    expect(playerSlots).toHaveLength(20)
-    expect(ghostSlots).toHaveLength(20)
+    expect(playerSlots).toHaveLength(18)
+    expect(ghostSlots).toHaveLength(18)
     expect(playerSlots.filter((slot) => slot.unlocked)).toHaveLength(11)
-    expect(playerSlots.filter((slot) => !slot.unlocked)).toHaveLength(9)
-    expect(playerSlots.filter((slot) => slot.zone === 'left')).toHaveLength(9)
+    expect(playerSlots.filter((slot) => !slot.unlocked)).toHaveLength(7)
+    expect(playerSlots.filter((slot) => slot.zone === 'left')).toHaveLength(8)
     expect(playerSlots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
-    expect(playerSlots.filter((slot) => slot.zone === 'right')).toHaveLength(9)
+    expect(playerSlots.filter((slot) => slot.zone === 'right')).toHaveLength(8)
 
     playerSlots.forEach((slot, index) => {
       expect(ghostSlots[index].x).toBeCloseTo(slot.x)

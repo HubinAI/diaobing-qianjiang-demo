@@ -261,10 +261,7 @@ button {
 
 .art-banner-left,
 .art-banner-right {
-  bottom: 20px;
-  width: 11px;
-  height: 42px;
-  border-left: 2px solid rgba(242, 193, 99, 0.6);
+  display: none;
 }
 
 .art-banner-left {
@@ -287,6 +284,7 @@ button {
   border: 1px solid rgba(255, 211, 118, 0.48);
   background: linear-gradient(135deg, rgba(130, 28, 24, 0.92), rgba(73, 18, 16, 0.75));
   clip-path: polygon(0 0, 100% 12%, 78% 54%, 100% 100%, 0 88%);
+  display: none;
 }
 
 .art-smoke-left,
