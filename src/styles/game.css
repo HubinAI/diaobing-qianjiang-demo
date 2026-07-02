@@ -574,7 +574,7 @@ button {
   position: absolute;
   left: 2px;
   right: 2px;
-  bottom: -5px;
+  top: -5px;
   height: 4px;
   overflow: hidden;
   border-radius: 999px;

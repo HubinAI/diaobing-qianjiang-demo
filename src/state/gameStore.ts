@@ -1,6 +1,6 @@
 import { duelConfig, enemyConfig, gameConfig, generalConfig, getRecruitCost, troopConfig, weaponConfig } from '../config/gameConfig'
 import { tickCombat } from '../game/combat'
-import { createInitialGameState, hashSeed, laneFromSlot } from '../game/engine'
+import { createInitialGameState, laneFromSlot } from '../game/engine'
 import { canMergeTroops, nextStar } from '../game/merge'
 import { pathIdFor } from '../game/paths'
 import { drawRecruitBatch } from '../game/randomPool'
@@ -794,10 +794,15 @@ export function createInitialDuelState(seed = 'duel-seed-001', phase: DuelGameSt
   const ghostBase = createInitialGameState(seed, phase === 'idle' ? 'idle' : 'playing', 'ghost')
   const ghost = { ...ghostBase, waveTable: player.waveTable }
 
-  // 随机对手难度
-  const difficulties: Array<'easy' | 'normal' | 'hard'> = ['easy', 'normal', 'hard']
-  const diffIndex = Math.abs(hashSeed(seed + '-ghost')) % difficulties.length
-  const ghostDifficulty = difficulties[diffIndex]
+  // 加权随机对手难度：青铜20%、白银40%、黄金40%
+  // 使用真正的 Math.random() 而非确定性哈希，确保每次开局对手不同
+  function pickWeightedDifficulty(): 'easy' | 'normal' | 'hard' {
+    const roll = Math.random()
+    if (roll < 0.2) return 'easy'      // 20% 青铜
+    if (roll < 0.6) return 'normal'    // 40% 白银
+    return 'hard'                       // 40% 黄金
+  }
+  const ghostDifficulty = pickWeightedDifficulty()
 
   const rankNames: Record<string, string> = { easy: '青铜对手', normal: '白银对手', hard: '黄金对手' }
   const ghostFileIds: Record<string, string> = { easy: 'easy-001', normal: 'normal-001', hard: 'hard-001' }
