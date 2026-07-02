@@ -56,9 +56,10 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
       data-unit-star={unit?.star ?? ''}
       data-selected={isSelected ? 'true' : 'false'}
       data-buffed={isBuffed ? 'true' : 'false'}
-      onClick={(event) => {
+      onPointerDown={(event) => {
         event.stopPropagation()
-        onSlotClick(slot.id)
+        if (!isDraggable || !unit) return
+        onDragStart({ source: 'slot', unitId: unit.id }, event)
       }}
     >
       {slot.unlocked ? (
@@ -66,11 +67,6 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
           <div
             className={`unit-token ${isDraggable ? 'is-draggable' : 'is-ghost-locked'} ${unit.kind === 'troop' ? troopConfig[unit.troopType].colorClass : generalConfig[unit.generalId].colorClass} ${unit.kind === 'general' ? `portrait-${unit.generalId}` : ''} ${unit.kind === 'general' && unit.equippedWeapon ? 'is-equipped' : ''}`}
             data-testid={unit.kind === 'general' ? `${slot.sideId}-general-${unit.id}` : `${slot.sideId}-unit-${unit.id}`}
-            onPointerDown={(event) => {
-              event.stopPropagation()
-              if (!isDraggable) return
-              onDragStart({ source: 'slot', unitId: unit.id }, event)
-            }}
           >
             <strong data-testid={`unit-label-${unit.id}`}>{unitLabel}</strong>
             <small data-testid={`star-indicator-${unit.id}`}>{showDps ? `DPS ${dps(unit)}` : stars(unit.star)}</small>

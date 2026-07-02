@@ -1528,15 +1528,9 @@ button {
   width: 56px;
   height: 48px;
   border-radius: 28px 28px 0 0;
-  background: linear-gradient(180deg,
-    rgba(6, 8, 10, 0.88),
-    rgba(10, 12, 14, 0.82)
-  );
-  border: 1px solid rgba(120, 85, 45, 0.45);
-  border-bottom: none;
-  box-shadow:
-    inset 0 3px 12px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(0, 0, 0, 0.25);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   z-index: 2;
   overflow: visible;
 }
@@ -1709,14 +1703,14 @@ button {
 .recruit-button .recruit-cost {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 18px;
   font-weight: 900;
   color: #5b3211;
 }
 
 .recruit-button .recruit-cost .coin-icon {
-  font-size: 12px;
+  font-size: 16px;
   color: #5b3211;
   text-shadow: none;
 }

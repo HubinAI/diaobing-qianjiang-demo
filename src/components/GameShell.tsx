@@ -57,14 +57,19 @@ export function GameShell({ state, dispatch }: GameShellProps) {
   // 教程生命周期
   useEffect(() => {
     if (prevPhaseRef.current === 'idle' && state.phase === 'playing') {
-      setTutorialStep(0)
-      setTutorialDone(false)
+      // 再来一局后跳过新手引导
+      if (state.player.metrics.restartClicked) {
+        setTutorialDone(true)
+      } else {
+        setTutorialStep(0)
+        setTutorialDone(false)
+      }
     }
     if (state.phase === 'won' || state.phase === 'lost' || state.phase === 'draw') {
       setTutorialDone(true)
     }
     prevPhaseRef.current = state.phase
-  }, [state.phase])
+  }, [state.phase, state.player.metrics.restartClicked])
 
   // 自动推进：识别玩家正确操作后立即切换
   const prevReserveLenRef = useRef(0)

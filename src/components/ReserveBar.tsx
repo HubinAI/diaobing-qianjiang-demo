@@ -46,8 +46,8 @@ export function ReserveBar({ items, coins, onDragStart, onShovelClick }: Reserve
 
   useEffect(() => {
     const delta = coins - prevCoinsRef.current
-    if (delta > 0 && delta < 5) {
-      // 只显示小额增量（排除击杀奖励等大额变化）
+    if (delta > 0 && delta < 5 && Math.floor(delta) > 0) {
+      // 只显示小额增量（排除击杀奖励等大额变化），过滤0值
       setCoinPop({ amount: Math.floor(delta), key: Date.now() })
       const timer = setTimeout(() => setCoinPop(null), 800)
       return () => clearTimeout(timer)
