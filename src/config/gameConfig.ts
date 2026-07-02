@@ -1,6 +1,6 @@
 import type { AttackShape, EnemyType, GeneralId, LaneId, TroopType, WeaponId } from '../types/game'
 
-export const APP_VERSION = 'V0702018'
+export const APP_VERSION = 'V0702019'
 
 export const gameConfig = {
   guardianMaxHp: 100,
@@ -40,9 +40,9 @@ export const gameConfig = {
   },
   attackEventLingerSeconds: 0.35,
   coinFlySeconds: 0.55,
-  enemyHpMultiplierPerWave: 0.25,
+  enemyHpMultiplierPerWave: 0.35,
   enemySpeedMultiplierPerWave: 0.04,
-  enemyGateDamageMultiplierPerWave: 0.15,
+  enemyGateDamageMultiplierPerWave: 0.20,
   bossHpMultiplier: 2.0,
   starMultiplier: {
     1: 1,

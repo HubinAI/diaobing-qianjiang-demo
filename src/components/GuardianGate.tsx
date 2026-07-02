@@ -9,8 +9,8 @@ function hpPercent(hp: number) {
   return Math.max(0, (hp / gameConfig.guardianMaxHp) * 100)
 }
 
-/** 根据战况选择貂蝉情绪状态 */
-function getDiaochanMood(hpPercent: number, phase: string, waveIndex: number, totalWaves: number): {
+/** 根据战况选择貂蝉情绪状态和气泡文本 */
+function getDiaochanMood(hpPercent: number, phase: string, elapsedSeconds: number, waveIndex: number, totalWaves: number): {
   mood: 'cheer' | 'worry' | 'panic' | 'celebrate' | 'idle'
   bubble: string
 } {
@@ -34,6 +34,10 @@ function getDiaochanMood(hpPercent: number, phase: string, waveIndex: number, to
   if (waveIndex === totalWaves) {
     return { mood: 'cheer', bubble: '最后一波！加油！' }
   }
+  // 开局前30秒提示
+  if (elapsedSeconds < 30 && hpPercent >= 90) {
+    return { mood: 'cheer', bubble: '将军，快快保护我呀' }
+  }
   // 满血鼓励
   if (hpPercent >= 90) {
     return { mood: 'cheer', bubble: '将军好厉害！' }
@@ -47,7 +51,7 @@ export function GuardianGate({ state }: GuardianGateProps) {
   const isCritical = playerHp <= 20
   const isDanger = playerHp <= 40 && playerHp > 20
   const totalWaves = state.player.waveTable.length
-  const { mood, bubble } = getDiaochanMood(playerHp, state.phase, state.player.waveIndex, totalWaves)
+  const { mood, bubble } = getDiaochanMood(playerHp, state.phase, state.elapsedSeconds, state.player.waveIndex, totalWaves)
 
   return (
     <section
