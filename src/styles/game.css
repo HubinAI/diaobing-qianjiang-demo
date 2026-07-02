@@ -1434,8 +1434,9 @@ button {
   pointer-events: none; /* 不阻挡点击 */
 }
 
-.city-gate * {
-  pointer-events: auto;
+.city-gate .diaochan-figure,
+.city-gate .diaochan-bubble {
+  pointer-events: none; /* 不阻挡拖动事件 */
 }
 
 /* 城墙主体 — 高度减半 */
@@ -1471,16 +1472,16 @@ button {
   height: 5px;
   margin: 0 auto;
   border-radius: 2px 2px 0 0;
-  background: linear-gradient(180deg, #b89340, #7a5222);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  background: transparent; /* 隐藏屋顶装饰条 */
+  box-shadow: none;
 }
 
 .gate-roof-eaves {
   width: 76px;
   height: 4px;
-  background: linear-gradient(180deg, #5c3018, #341a0b);
-  clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  background: transparent; /* 隐藏屋檐装饰条 */
+  clip-path: none;
+  box-shadow: none;
 }
 
 /* 城墙砖纹理 — 缩小 */
