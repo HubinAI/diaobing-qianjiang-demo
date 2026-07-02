@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { gameConfig, generalConfig, troopConfig, weaponConfig } from '../config/gameConfig'
 import type { DragPayload, ReserveItem } from '../types/game'
 
@@ -40,12 +41,32 @@ function renderItem(item: ReserveItem) {
 }
 
 export function ReserveBar({ items, coins, onDragStart, onShovelClick }: ReserveBarProps) {
+  const prevCoinsRef = useRef(coins)
+  const [coinPop, setCoinPop] = useState<{ amount: number; key: number } | null>(null)
+
+  useEffect(() => {
+    const delta = coins - prevCoinsRef.current
+    if (delta > 0 && delta < 5) {
+      // 只显示小额增量（排除击杀奖励等大额变化）
+      setCoinPop({ amount: Math.floor(delta), key: Date.now() })
+      const timer = setTimeout(() => setCoinPop(null), 800)
+      return () => clearTimeout(timer)
+    }
+    prevCoinsRef.current = coins
+  }, [coins])
+
   return (
     <section className="reserve-section">
       <div className="reserve-label">
+        <span>本轮补兵</span>
         <span className="reserve-coins">
           <i className="coin-icon" aria-hidden="true">◈</i>
-          <strong>{coins}</strong>
+          <strong>{Math.floor(coins)}</strong>
+          {coinPop && (
+            <span className="coin-pop" key={coinPop.key}>
+              +{coinPop.amount}
+            </span>
+          )}
         </span>
       </div>
       <div className="reserve-grid">
