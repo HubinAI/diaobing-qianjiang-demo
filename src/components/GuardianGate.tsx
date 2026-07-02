@@ -84,9 +84,9 @@ export function GuardianGate({ state }: GuardianGateProps) {
                   <span>{bubble}</span>
                 </div>
               )}
-              {/* 头顶血条 */}
+              {/* 头顶血条 — 蝴蝶结发带 */}
               <div className="diaochan-hp-bar">
-                <div className="diaochan-hp-track">
+                <div className={`diaochan-hp-track ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}>
                   <div
                     className={`diaochan-hp-fill ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}
                     style={{ width: `${playerHp}%` }}
