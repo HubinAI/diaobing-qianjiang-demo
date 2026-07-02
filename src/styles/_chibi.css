@@ -11,12 +11,11 @@
   z-index: 5;
 }
 
-/* 情绪气泡 */
+/* 情绪气泡 — 移到貂蝉右侧 */
 .diaochan-bubble {
   position: absolute;
-  top: -26px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 14px;
+  left: 34px;
   z-index: 25;
   padding: 3px 8px;
   border-radius: 10px;
@@ -30,14 +29,14 @@
 .diaochan-bubble::after {
   content: '';
   position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 0;
   height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid rgba(255, 255, 255, 0.95);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 5px solid rgba(255, 255, 255, 0.95);
 }
 
 .diaochan-bubble span {
@@ -47,15 +46,15 @@
 }
 
 @keyframes bubble-pop {
-  0% { opacity: 0; transform: translateX(-50%) scale(0.6) translateY(4px); }
-  70% { transform: translateX(-50%) scale(1.05) translateY(-2px); }
-  100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  0% { opacity: 0; transform: scale(0.6) translateX(-4px); }
+  70% { transform: scale(1.05) translateX(2px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
 }
 
-/* 貂蝉头顶血条 — 伪装成粉色蝴蝶结发带 */
+/* 貂蝉血条 — 移到身体下方 */
 .diaochan-hp-bar {
   position: absolute;
-  top: -2px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 24px;
