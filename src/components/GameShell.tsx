@@ -38,6 +38,7 @@ export function GameShell({ state, dispatch }: GameShellProps) {
   const [tutorialStep, setTutorialStep] = useState(-1)
   const [tutorialDone, setTutorialDone] = useState(false)
   const [matchmaking, setMatchmaking] = useState(false)
+  const [restartRequested, setRestartRequested] = useState(false)
   const prevPhaseRef = useRef(state.phase)
   const recruitBtnRef = useRef<HTMLButtonElement>(null)
   const reserveRef = useRef<HTMLDivElement>(null)
@@ -245,7 +246,7 @@ export function GameShell({ state, dispatch }: GameShellProps) {
           <AudioManager state={state.player} />
         </footer>
         <DebugPanel state={state} dispatch={dispatch} onToggle={() => dispatch({ type: 'toggleDebug' })} />
-        {state.phase === 'idle' && !matchmaking && (
+        {state.phase === 'idle' && !matchmaking && !restartRequested && (
           <div className="start-overlay">
             <div className="start-intro">
               <h1>调兵遣将</h1>
@@ -255,6 +256,17 @@ export function GameShell({ state, dispatch }: GameShellProps) {
               开始竞速
             </button>
           </div>
+        )}
+        {/* restart 后的自动匹配：检测到 restartRequested + idle 状态即触发 */}
+        {restartRequested && state.phase === 'idle' && (
+          <MatchmakingOverlay
+            targetDifficulty={state.ghostDifficulty}
+            onComplete={() => {
+              setRestartRequested(false)
+              setMatchmaking(false)
+              dispatch({ type: 'start' })
+            }}
+          />
         )}
         {matchmaking && (
           <MatchmakingOverlay
@@ -307,7 +319,13 @@ export function GameShell({ state, dispatch }: GameShellProps) {
         )}
       </div>
       <CompendiumModal open={state.showCompendium} onClose={() => dispatch({ type: 'toggleCompendium' })} />
-      <ResultModal state={state} onRestart={() => dispatch({ type: 'restart' })} />
+      <ResultModal
+        state={state}
+        onRestart={() => {
+          dispatch({ type: 'restart' })
+          setRestartRequested(true)
+        }}
+      />
     </div>
   )
 }

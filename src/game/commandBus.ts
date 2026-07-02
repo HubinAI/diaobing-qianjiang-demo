@@ -403,7 +403,7 @@ export function duelReducer(state: DuelGameState, action: GameAction): DuelGameS
     case 'resume':
       return state.phase === 'paused' ? { ...state, phase: 'playing' } : state
     case 'restart':
-      return { ...createInitialDuelState(action.seed ?? state.seed, 'playing'), metrics: { ...createInitialDuelState(action.seed ?? state.seed, 'playing').metrics, restartClicked: true } }
+      return { ...createInitialDuelState(action.seed ?? state.seed, 'idle'), metrics: { ...createInitialDuelState(action.seed ?? state.seed, 'idle').metrics, restartClicked: true } }
     case 'tick':
       return tickDuel(state, action.delta)
     case 'advanceTime':
