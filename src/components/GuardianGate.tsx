@@ -20,11 +20,13 @@ export function GuardianGate({ state }: GuardianGateProps) {
       aria-label="我方貂蝉状态"
       data-testid="player-guardian-zone"
     >
-      {/* 城墙背景 */}
+      {/* 城墙背景 + 貂蝉立绘 + 血条融合 */}
       <div className="gate-wall">
-        {/* 城门楼屋顶 */}
+        {/* 城门楼屋顶 + 血量百分比 */}
         <div className="gate-roof">
-          <div className="gate-roof-top" />
+          <div className="gate-roof-top">
+            <span className="diaochan-hp-badge" data-testid="player-guardian-hp">{Math.ceil(playerHp)}%</span>
+          </div>
           <div className="gate-roof-eaves" />
         </div>
         {/* 城墙主体 */}
@@ -33,14 +35,23 @@ export function GuardianGate({ state }: GuardianGateProps) {
           <div className="gate-brick-row" />
           <div className="gate-brick-row" />
         </div>
-        {/* 城门拱洞 */}
+        {/* 城门拱洞 + 貂蝉立绘 + 血条 */}
         <div className="gate-arch">
           <div className="gate-arch-inner">
-            {/* 貂蝉立绘 */}
+            {/* 貂蝉人物立绘 + 头顶血条 */}
             <div
               className={`diaochan-figure ${isCritical ? 'is-critical' : isDanger ? 'is-danger' : ''}`}
               data-testid="diaochan-avatar"
             >
+              {/* 头顶血条 */}
+              <div className="diaochan-hp-bar">
+                <div className="diaochan-hp-track">
+                  <div
+                    className={`diaochan-hp-fill ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}
+                    style={{ width: `${playerHp}%` }}
+                  />
+                </div>
+              </div>
               <div className="diaochan-body">
                 <div className="diaochan-head">
                   <div className="diaochan-hair" />
@@ -54,19 +65,6 @@ export function GuardianGate({ state }: GuardianGateProps) {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      {/* 血条 */}
-      <div className="gate-hp-bar">
-        <div className="gate-hp-label">
-          <span>貂蝉</span>
-          <strong data-testid="player-guardian-hp">{Math.ceil(playerHp)}%</strong>
-        </div>
-        <div className="hp-track gate-hp-track">
-          <div
-            className={`hp-fill ${isCritical ? 'hp-critical' : isDanger ? 'hp-danger' : ''}`}
-            style={{ width: `${playerHp}%` }}
-          />
         </div>
       </div>
     </section>

@@ -1404,7 +1404,7 @@ button {
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* 城门楼屋顶 — 等比缩小 */
+/* 城门楼屋顶 — 等比缩小，融入百分比 */
 .gate-roof {
   position: absolute;
   top: 0;
@@ -1414,12 +1414,27 @@ button {
 }
 
 .gate-roof-top {
+  position: relative;
   width: 50px;
   height: 5px;
   margin: 0 auto;
   border-radius: 2px 2px 0 0;
   background: linear-gradient(180deg, #b89340, #7a5222);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 貂蝉血量百分比 — 放在城门楼顶部 */
+.diaochan-hp-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #f5d479;
+  text-shadow: 0 0 4px rgba(245, 212, 121, 0.5), 0 1px 2px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  z-index: 10;
 }
 
 .gate-roof-eaves {
@@ -1502,9 +1517,45 @@ button {
   width: 28px;
   height: 40px;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   margin-bottom: 1px;
+}
+
+/* 貂蝉头顶血条 — 融入人物 */
+.diaochan-hp-bar {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  z-index: 10;
+}
+
+.diaochan-hp-track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(44, 7, 7, 0.86);
+  overflow: hidden;
+}
+
+.diaochan-hp-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e94c38, #f8d665);
+  transition: width 200ms ease;
+}
+
+.diaochan-hp-fill.hp-danger {
+  background: linear-gradient(90deg, #ff6d44, #ffd060);
+  box-shadow: 0 0 4px rgba(255, 109, 67, 0.5);
+}
+
+.diaochan-hp-fill.hp-critical {
+  background: linear-gradient(90deg, #ff2a2a, #ff8844);
+  animation: hp-critical-blink 0.6s ease-in-out infinite;
 }
 
 .diaochan-body {
@@ -1632,7 +1683,7 @@ button {
   75% { transform: translateX(1px); }
 }
 
-/* 城门危险/危机状态 — 弱化边框表现，用光晕融入场景 */
+/* 城门危险/危机状态 */
 .city-gate.is-danger .gate-wall {
   border-color: rgba(255, 109, 104, 0.45);
   box-shadow:
@@ -1659,34 +1710,10 @@ button {
   }
 }
 
-/* 血条 — 轻量融入，去掉独立面板边框 */
-.gate-hp-bar {
-  padding: 3px 6px 2px;
-  border: none;
-  border-radius: 0 0 4px 4px;
-  background: linear-gradient(180deg,
-    rgba(20, 16, 12, 0.6),
-    rgba(14, 10, 8, 0.7)
-  );
-  margin: 0;
-}
-
-.gate-hp-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 2px;
-  font-size: 9px;
-  color: rgba(200, 170, 120, 0.7);
-}
-
-.gate-hp-label strong {
-  color: #f0cc70;
-  font-size: 10px;
-}
-
-.gate-hp-track {
-  height: 6px;
+/* 血条闪烁动画 */
+@keyframes hp-critical-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* 通用血条（TopHud / ReserveBar 等复用） */
