@@ -1561,41 +1561,6 @@ button {
   margin-bottom: 1px;
 }
 
-/* 貂蝉头顶血条 — 融入人物 */
-.diaochan-hp-bar {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  z-index: 10;
-}
-
-.diaochan-hp-track {
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(44, 7, 7, 0.86);
-  overflow: hidden;
-}
-
-.diaochan-hp-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #e94c38, #f8d665);
-  transition: width 200ms ease;
-}
-
-.diaochan-hp-fill.hp-danger {
-  background: linear-gradient(90deg, #ff6d44, #ffd060);
-  box-shadow: 0 0 4px rgba(255, 109, 67, 0.5);
-}
-
-.diaochan-hp-fill.hp-critical {
-  background: linear-gradient(90deg, #ff2a2a, #ff8844);
-  animation: hp-critical-blink 0.6s ease-in-out infinite;
-}
-
 .diaochan-body {
   position: relative;
   width: 100%;

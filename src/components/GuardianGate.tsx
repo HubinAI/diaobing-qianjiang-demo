@@ -34,7 +34,10 @@ function getDiaochanMood(hpPercent: number, phase: string, elapsedSeconds: numbe
   if (waveIndex === totalWaves) {
     return { mood: 'cheer', bubble: '最后一波！加油！' }
   }
-  // 开局前30秒提示
+  // 开局前5秒不显示气泡，5-30秒显示初始提示
+  if (elapsedSeconds < 5) {
+    return { mood: 'idle', bubble: '' }
+  }
   if (elapsedSeconds < 30 && hpPercent >= 90) {
     return { mood: 'cheer', bubble: '将军，快快保护我呀' }
   }
