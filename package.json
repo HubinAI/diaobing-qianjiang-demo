@@ -11,7 +11,7 @@
     "test:watch": "vitest --config vitest.config.js",
     "simulate:recruit": "vitest run --config vitest.config.js src/game/randomPool.test.ts -t \"matches category probabilities over 100000 recruit slots\" --reporter=verbose",
     "test:e2e": "playwright test",
-    "build": "tsc -b && vite build",
+    "build": "NODE_OPTIONS=\"\" npx tsx scripts/bump-version.ts && tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1 --config vite.config.ts",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run test:e2e && npm run build"
   },

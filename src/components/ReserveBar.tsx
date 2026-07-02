@@ -3,6 +3,7 @@ import type { DragPayload, ReserveItem } from '../types/game'
 
 interface ReserveBarProps {
   items: ReserveItem[]
+  coins: number
   onDragStart: (payload: DragPayload, event: React.PointerEvent<HTMLElement>) => void
   onShovelClick: (itemId: string) => void
 }
@@ -38,14 +39,14 @@ function renderItem(item: ReserveItem) {
   return { icon: '锹', label: '铁锹', className: 'unit-shovel', sub: '解锁', compactIdentity: false }
 }
 
-export function ReserveBar({ items, onDragStart, onShovelClick }: ReserveBarProps) {
+export function ReserveBar({ items, coins, onDragStart, onShovelClick }: ReserveBarProps) {
   return (
     <section className="reserve-section">
       <div className="reserve-label">
-        <span>本轮补兵</span>
-        <strong>
-          {items.length}/{gameConfig.reserveCapacity}
-        </strong>
+        <span className="reserve-coins">
+          <i className="coin-icon" aria-hidden="true">◈</i>
+          <strong>{coins}</strong>
+        </span>
       </div>
       <div className="reserve-grid">
         {Array.from({ length: gameConfig.reserveCapacity }, (_, index) => {

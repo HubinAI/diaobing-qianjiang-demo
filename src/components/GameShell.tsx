@@ -233,6 +233,7 @@ export function GameShell({ state, dispatch }: GameShellProps) {
         <div ref={reserveRef}>
           <ReserveBar
             items={state.player.reserveItems}
+            coins={state.player.coins}
             onDragStart={handleDragStart}
             onShovelClick={(itemId) => dispatch({ type: 'selectReserveShovel', itemId })}
           />
