@@ -95,7 +95,7 @@ export const gameConfig = {
 
 export const duelConfig = {
   rulesetVersion: 'ghost-duel-v1',
-  configHash: 'round5-a81d2f',
+  configHash: 'round6-b92e3a',
   maxMatchSeconds: 300,
   leftSpawn: { x: 0, y: 0.5 },
   rightSpawn: { x: 1, y: 0.5 },

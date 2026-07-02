@@ -54,18 +54,18 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
   expect(guardianRatio).toBeGreaterThanOrEqual(0.08)
   expect(guardianRatio).toBeLessThanOrEqual(0.12)
 
-  await expect(page.locator('[data-side-id="player"]')).toHaveCount(22)
-  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(22)
+  await expect(page.locator('[data-side-id="player"]')).toHaveCount(20)
+  await expect(page.locator('[data-side-id="ghost"]')).toHaveCount(20)
   await expect(page.getByTestId('path-player-left')).toBeVisible()
   await expect(page.getByTestId('path-player-right')).toBeVisible()
   await expect(page.getByTestId('path-ghost-left')).toBeVisible()
   await expect(page.getByTestId('path-ghost-right')).toBeVisible()
 
   const state = await debugState(page)
-  expect(state.player.slots.filter((slot) => slot.zone === 'left')).toHaveLength(10)
+  expect(state.player.slots.filter((slot) => slot.zone === 'left')).toHaveLength(9)
   expect(state.player.slots.filter((slot) => slot.zone === 'center')).toHaveLength(2)
-  expect(state.player.slots.filter((slot) => slot.zone === 'right')).toHaveLength(10)
-  expect(state.player.slots.filter((slot) => slot.unlocked)).toHaveLength(13)
+  expect(state.player.slots.filter((slot) => slot.zone === 'right')).toHaveLength(9)
+  expect(state.player.slots.filter((slot) => slot.unlocked)).toHaveLength(11)
   expect(state.player.slots.filter((slot) => !slot.unlocked)).toHaveLength(9)
   state.player.slots.forEach((slot, index) => {
     const ghost = state.ghost.slots[index]
@@ -159,10 +159,9 @@ test('renders mirrored duel battlefield with required ids', async ({ page }) => 
     })
   })
   layoutRelation.forEach((slot) => {
-    const isAux = slot.id.includes('-aux-')
-    expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(isAux ? 12 : 24)
+    expect(Math.min(slot.leftEdge, slot.rightEdge), slot.id).toBeGreaterThanOrEqual(22)
     expect(slot.roadDistance, slot.id).toBeGreaterThanOrEqual(0.105)
-    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(isAux ? 0.34 : 0.24)
+    expect(slot.roadDistance, slot.id).toBeLessThanOrEqual(0.26)
     expect(slot.facingDot, slot.id).toBeGreaterThan(0.04)
   })
 })

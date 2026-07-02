@@ -44,118 +44,84 @@ function slotFromRoad(anchor: SlotAnchor): SlotTemplate {
 
 const leftRoad = playerRoadLayouts.left
 
+// 槽位布局策略：沿 L 形路线外侧形成规整的两列
+// - 横向段（上边）：槽位在路线上方，y 对齐
+// - 纵向段（左边）：槽位在路线左侧，x 对齐
+// - 第一列（主槽位 unlocked）：靠近路线
+// - 第二列（锁定槽位 locked）：在第一列外侧
+
 const leftSlotAnchors: SlotAnchor[] = [
+  // --- 横向段：2个主槽位（路线上方）---
   {
     baseId: 'left-active-0',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 0,
-    roadPoint: { x: 0.14, y: leftRoad.horizontal.start.y },
-    offset: { x: 0, y: 0.14 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: true, index: 0,
+    roadPoint: { x: 0.12, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.12 },
   },
   {
     baseId: 'left-active-1',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 1,
-    roadPoint: { x: 0.25, y: leftRoad.horizontal.start.y },
-    offset: { x: 0, y: 0.14 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: true, index: 1,
+    roadPoint: { x: 0.23, y: leftRoad.horizontal.start.y },
+    offset: { x: 0, y: 0.12 },
     targetPoint: leftRoad.turn[0],
   },
+  // --- 纵向段：3个主槽位 + 3个锁定（路线左侧）---
   {
     baseId: 'left-active-2',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 2,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.77 },
-    offset: { x: -0.125, y: 0 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: true, index: 2,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.76 },
+    offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-active-3',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 3,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.87 },
-    offset: { x: -0.125, y: 0 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: true, index: 3,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.86 },
+    offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-active-4',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 4,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.97 },
-    offset: { x: -0.125, y: 0 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: true, index: 4,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.96 },
+    offset: { x: -0.12, y: 0 },
   },
   {
     baseId: 'left-locked-0',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: false,
-    index: 5,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.79 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: false, index: 5,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.76 },
     offset: { x: -0.24, y: 0 },
   },
   {
     baseId: 'left-locked-1',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: false,
-    index: 6,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.9 },
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: false, index: 6,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.86 },
     offset: { x: -0.24, y: 0 },
   },
-]
-
-const leftAuxSlotAnchors: SlotAnchor[] = [
   {
-    baseId: 'left-aux-active-0',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: true,
-    index: 7,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.735 },
-    offset: { x: -0.31, y: 0 },
-    targetPoint: { x: 0.08, y: leftRoad.horizontal.start.y },
+    baseId: 'left-locked-2',
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: false, index: 7,
+    roadPoint: { x: leftRoad.vertical.start.x, y: 0.96 },
+    offset: { x: -0.24, y: 0 },
   },
+  // --- 拐角锁定格（位于转弯外侧）---
   {
-    baseId: 'left-aux-locked-0',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: false,
-    index: 8,
-    roadPoint: { x: leftRoad.vertical.start.x, y: 0.85 },
-    offset: { x: -0.31, y: 0 },
-  },
-  {
-    baseId: 'left-aux-locked-1',
-    zone: 'left',
-    lane: 'left',
-    adjacentRoadKey: 'left',
-    unlocked: false,
-    index: 9,
-    roadPoint: { x: leftRoad.vertical.end.x, y: leftRoad.vertical.end.y },
-    offset: { x: -0.225, y: 0.005 },
+    baseId: 'left-locked-turn',
+    zone: 'left', lane: 'left', adjacentRoadKey: 'left',
+    unlocked: false, index: 8,
+    roadPoint: { x: 0.32, y: 0.57 },
+    offset: { x: -0.10, y: 0.12 },
+    targetPoint: { x: 0.39, y: 0.66 },
   },
 ]
 
-const leftSlotPlan: SlotTemplate[] = [
-  ...leftSlotAnchors.map(slotFromRoad),
-  ...leftAuxSlotAnchors.map(slotFromRoad),
-]
+const leftSlotPlan: SlotTemplate[] = leftSlotAnchors.map(slotFromRoad)
 
 const centerSlotPlan: SlotTemplate[] = [
   { baseId: 'center-active-0', zone: 'center', lane: 'merge', adjacentRoadKey: 'merge', unlocked: true, index: 0, x: 0.5, y: 0.76, facingAngleDeg: -90 },
