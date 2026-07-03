@@ -61,6 +61,10 @@ export function DeploymentSlot({ slot, unit, isUnlockable, isInvalid, showDps, i
         if (!isDraggable || !unit) return
         onDragStart({ source: 'slot', unitId: unit.id }, event)
       }}
+      onClick={(event) => {
+        event.stopPropagation()
+        onSlotClick(slot.id)
+      }}
     >
       {slot.unlocked ? (
         unit ? (
