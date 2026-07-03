@@ -15,10 +15,27 @@ function ghostRankLabel(difficulty: string): string {
   return '白银'
 }
 
+/** Q版小头像 — 简约版本，用于顶栏 */
+function MiniChibi({ mood }: { mood: 'idle' | 'worry' | 'cheer' }) {
+  return (
+    <span className="mini-chibi" aria-hidden="true">
+      <span className="mini-chibi-face">
+        <span className={`mini-chibi-eyes mood-${mood}`}>
+          <span className="mini-eye" />
+          <span className="mini-eye" />
+        </span>
+        <span className="mini-chibi-mouth" />
+      </span>
+      <span className="mini-chibi-hair" />
+    </span>
+  )
+}
+
 export function TopHud({ state }: TopHudProps) {
   const waveTable = state.player.waveTable
   const totalWaves = waveTable.length
   const wave = waveTable[state.player.waveIndex - 1]
+  const playerHpPercent = hpPercent(state.player.guardianHp)
   const ghostHpPercent = hpPercent(state.ghost.guardianHp)
   const isBossWave = wave?.index === totalWaves
   const countdown =
@@ -27,20 +44,27 @@ export function TopHud({ state }: TopHudProps) {
       : isBossWave
         ? 'Boss 来袭'
         : ''
+  const ghostMood = ghostHpPercent <= 30 ? 'worry' : ghostHpPercent >= 70 ? 'cheer' : 'idle'
+  const playerMood = playerHpPercent <= 30 ? 'worry' : playerHpPercent >= 70 ? 'cheer' : 'idle'
 
   return (
     <header className="top-hud duel-hud">
-      <div className="ghost-card">
-        <span className="ghost-avatar" aria-hidden="true">影</span>
-        <div>
-          <strong data-testid="ghost-name">{ghostRankLabel(state.ghostDifficulty)}对手</strong>
-        </div>
+      <div className="hud-guardian-card player-card">
+        <span className="guardian-label">我方</span>
+        <MiniChibi mood={playerMood} />
+        <span className="guardian-hp-text">{playerHpPercent}%</span>
       </div>
       <div className="hud-center">
-        <strong data-testid="duel-time" data-value={ghostHpPercent} data-elapsed={state.elapsedSeconds}>
-          对方貂蝉 {ghostHpPercent}%
-        </strong>
+        <div className="ghost-card">
+          <span className="ghost-avatar" aria-hidden="true">影</span>
+          <strong data-testid="ghost-name">{ghostRankLabel(state.ghostDifficulty)}对手</strong>
+        </div>
         {countdown && <span className="wave-alert">{countdown}</span>}
+      </div>
+      <div className="hud-guardian-card ghost-card-hp">
+        <span className="guardian-label">对方</span>
+        <MiniChibi mood={ghostMood} />
+        <span className="guardian-hp-text">{ghostHpPercent}%</span>
       </div>
       <div className="hud-wave">
         <span className="version-label">{APP_VERSION}</span>
