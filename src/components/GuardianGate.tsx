@@ -131,6 +131,7 @@ export function GuardianGate({ state }: GuardianGateProps) {
             </div>
             {/* 血量条 — 移到貂蝉外部，避免被transform影响 */}
             <div className="diaochan-hp-bar">
+              <span className="diaochan-hp-label">我方</span>
               <div className="diaochan-hp-text">
                 <span>{Math.ceil(playerHp)}%</span>
               </div>
