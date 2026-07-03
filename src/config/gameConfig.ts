@@ -1,6 +1,6 @@
 import type { AttackShape, EnemyType, GeneralId, LaneId, TroopType, WeaponId } from '../types/game'
 
-export const APP_VERSION = 'V0703001'
+export const APP_VERSION = 'V0703002'
 
 export const gameConfig = {
   guardianMaxHp: 100,
@@ -16,9 +16,9 @@ export const gameConfig = {
   recruitCostMax: 80,
   recruitBatchSize: 6,
   reserveCapacity: 6,
-  initialShovels: 1,
-  shovelRegenSeconds: 45,
-  maxStoredShovels: 2,
+  initialShovels: 3,
+  shovelRegenSeconds: 30,
+  maxStoredShovels: 4,
   maxTroopStar: 5,
   maxGeneralStar: 5,
   battlefieldHeightToWidthRatio: 1.26,
