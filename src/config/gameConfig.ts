@@ -1,6 +1,6 @@
 import type { AttackShape, EnemyType, GeneralId, LaneId, TroopType, WeaponId } from '../types/game'
 
-export const APP_VERSION = 'V0703002'
+export const APP_VERSION = 'V0703003'
 
 export const gameConfig = {
   guardianMaxHp: 100,
@@ -16,9 +16,9 @@ export const gameConfig = {
   recruitCostMax: 80,
   recruitBatchSize: 6,
   reserveCapacity: 6,
-  initialShovels: 3,
-  shovelRegenSeconds: 30,
-  maxStoredShovels: 4,
+  initialShovels: 1,
+  shovelRegenSeconds: 40,
+  maxStoredShovels: 2,
   maxTroopStar: 5,
   maxGeneralStar: 5,
   battlefieldHeightToWidthRatio: 1.26,
@@ -267,10 +267,10 @@ export const enemyConfig: Record<
   EnemyType,
   { label: string; hp: number; speed: number; gateDamage: number; coinReward: number; icon: string }
 > = {
-  normal: { label: '步卒', hp: 78, speed: 0.038, gateDamage: 5, coinReward: 2, icon: '卒' },
-  fast: { label: '轻骑', hp: 55, speed: 0.068, gateDamage: 4, coinReward: 2, icon: '骑' },
-  heavy: { label: '重甲', hp: 220, speed: 0.028, gateDamage: 12, coinReward: 5, icon: '甲' },
-  boss: { label: 'Boss', hp: 2400, speed: 0.020, gateDamage: 45, coinReward: 30, icon: '将' },
+  normal: { label: '步卒', hp: 94, speed: 0.038, gateDamage: 5, coinReward: 2, icon: '卒' },
+  fast: { label: '轻骑', hp: 66, speed: 0.068, gateDamage: 4, coinReward: 2, icon: '骑' },
+  heavy: { label: '重甲', hp: 264, speed: 0.028, gateDamage: 12, coinReward: 5, icon: '甲' },
+  boss: { label: 'Boss', hp: 2880, speed: 0.020, gateDamage: 45, coinReward: 30, icon: '将' },
 }
 
 export function getRecruitCost(batchIndex: number) {
